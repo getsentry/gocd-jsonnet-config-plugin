@@ -24,13 +24,16 @@ import java.util.function.Supplier;
 
 import static cd.go.plugin.config.yaml.PluginSettings.DEFAULT_FILE_PATTERN;
 import static cd.go.plugin.config.yaml.PluginSettings.PLUGIN_SETTINGS_FILE_PATTERN;
+import static cd.go.plugin.config.yaml.PluginSettings.DEFAULT_ROOT_DIRECTORY;
+import static cd.go.plugin.config.yaml.PluginSettings.PLUGIN_SETTINGS_ROOT_DIRECTORY;
 import static com.thoughtworks.go.plugin.api.response.DefaultGoPluginApiResponse.*;
 import static java.lang.String.format;
 
 @Extension
 public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
-    private static final String DISPLAY_NAME_FILE_PATTERN = "Go YAML files pattern";
-    private static final String PLUGIN_ID = "yaml.config.plugin";
+    private static final String DISPLAY_NAME_FILE_PATTERN = "Go Jsonnet files pattern";
+    private static final String DISPLAY_NAME_ROOT_DIRECTORY = "Jsonnet root directory";
+    private static final String PLUGIN_ID = "jsonnet.config.plugin";
     private static Logger LOGGER = Logger.getLoggerFor(YamlConfigPlugin.class);
 
     private final Gson gson = new Gson();
@@ -120,7 +123,7 @@ public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
         return handlingErrors(() -> {
             ParsedRequest parsed = ParsedRequest.parse(request);
 
-            YamlConfigParser parser = new YamlConfigParser();
+            JsonnetConfigParser parser = new JsonnetConfigParser();
             Map<String, String> contents = parsed.getParam("contents");
             JsonConfigCollection result = new JsonConfigCollection();
             contents.forEach((filename, content) -> {
@@ -154,7 +157,7 @@ public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
             File baseDir = new File(parsed.getStringParam("directory"));
             String[] files = scanForConfigFiles(parsed, baseDir);
 
-            YamlConfigParser parser = new YamlConfigParser();
+            JsonnetConfigParser parser = new JsonnetConfigParser();
 
             JsonConfigCollection config = parser.parseFiles(baseDir, files);
             config.updateTargetVersionFromFiles();
@@ -203,6 +206,7 @@ public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
     private GoPluginApiResponse handleGetPluginSettingsConfiguration() {
         Map<String, Object> response = new HashMap<>();
         response.put(PLUGIN_SETTINGS_FILE_PATTERN, createField(DISPLAY_NAME_FILE_PATTERN, DEFAULT_FILE_PATTERN, false, false, "0"));
+        response.put(PLUGIN_SETTINGS_ROOT_DIRECTORY, createField(DISPLAY_NAME_ROOT_DIRECTORY, DEFAULT_ROOT_DIRECTORY, false, false, "1"));
         return success(gson.toJson(response));
     }
 
@@ -222,9 +226,9 @@ public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
         } catch (ParsedRequest.RequestParseException e) {
             return badRequest(e.getMessage());
         } catch (Exception e) {
-            LOGGER.error("Unexpected error occurred in YAML configuration plugin.", e);
+            LOGGER.error("Unexpected error occurred in Jsonnet configuration plugin.", e);
             JsonConfigCollection config = new JsonConfigCollection();
-            config.addError(new PluginError(e.toString(), "YAML config plugin"));
+            config.addError(new PluginError(e.toString(), "Jsonnet config plugin"));
             return error(gson.toJson(config.getJsonObject()));
         }
     }
