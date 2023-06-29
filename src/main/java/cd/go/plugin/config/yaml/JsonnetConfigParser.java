@@ -18,9 +18,8 @@ public class JsonnetConfigParser extends YamlConfigParser {
             try {
                 File filePath = new File(baseDir, file);
                 InputStream input = compileJsonnet(filePath.toString());
-                // TODO: Properly handle this case when an alternate file pattern is specified
-                String updatedFile = file.replace(".jsonnet", ".yaml");
-                super.parseStream(collection, input, updatedFile);
+                // Calling YamlConfigParser's parseStream method (instead of the overridden one below)
+                super.parseStream(collection, input, file);
             } catch (NullPointerException e) {
                 collection.addError("File matching GoCD Jsonnet pattern disappeared", file);
             }

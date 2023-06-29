@@ -4,7 +4,7 @@
   "environments": [],
   "pipelines": [
     {
-      "location": "format-version-10.gocd.yaml",
+      "location": "format-version-10.gocd.jsonnet",
       "name": "pipe1",
       "group": "simple",
       "materials": [
@@ -38,7 +38,7 @@
       ]
     },
     {
-      "location": "format-version-10.gocd.yaml",
+      "location": "format-version-10.gocd.jsonnet",
       "name": "pipe2",
       "group": "simple",
       "materials": [

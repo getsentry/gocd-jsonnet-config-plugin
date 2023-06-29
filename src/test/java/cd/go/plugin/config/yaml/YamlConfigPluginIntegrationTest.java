@@ -59,7 +59,7 @@ public class YamlConfigPluginIntegrationTest {
         IOUtils.copy(getResourceAsStream("examples/simple.gocd.jsonnet"), w);
         request.setRequestBody(gson.toJson(
                 Collections.singletonMap("contents",
-                        Collections.singletonMap("simple.gocd.yaml", w.toString())
+                        Collections.singletonMap("simple.gocd.jsonnet", w.toString())
                 )
         ));
 
@@ -208,30 +208,8 @@ public class YamlConfigPluginIntegrationTest {
         JsonObject responseJsonObject = getJsonObjectFromResponse(response);
         JsonArray pipelines = responseJsonObject.get("pipelines").getAsJsonArray();
         assertThat(pipelines.size(), is(0));
-        assertFirstError(responseJsonObject, "Failed to parse pipeline pipe1; expected a hash of pipeline materials", "simple-invalid.gocd.yaml");
+        assertFirstError(responseJsonObject, "Failed to parse pipeline pipe1; expected a hash of pipeline materials", "simple-invalid.gocd.jsonnet");
     }
-
-    // @Test
-    // public void shouldRespondSuccessWithErrorMessagesToParseDirectoryRequestWhenDuplicateKeysCaseFile() throws UnhandledRequestTypeException, IOException {
-    //     GoPluginApiResponse response = parseAndGetResponseForDir(setupCase("duplicate-materials"));
-
-    //     assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
-    //     JsonObject responseJsonObject = getJsonObjectFromResponse(response);
-    //     JsonArray pipelines = responseJsonObject.get("pipelines").getAsJsonArray();
-    //     assertThat(pipelines.size(), is(0));
-    //     assertFirstError(responseJsonObject, "Line 9, column 20: Duplicate key found 'upstream'", "duplicate-materials.gocd.yaml");
-    // }
-
-    // @Test
-    // public void shouldRespondSuccessWithErrorMessagesToParseDirectoryRequestWhenParsingErrorCaseFile() throws UnhandledRequestTypeException, IOException {
-    //     GoPluginApiResponse response = parseAndGetResponseForDir(setupCase("invalid-materials"));
-
-    //     assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
-    //     JsonObject responseJsonObject = getJsonObjectFromResponse(response);
-    //     JsonArray pipelines = responseJsonObject.get("pipelines").getAsJsonArray();
-    //     assertThat(pipelines.size(), is(0));
-    //     assertFirstError(responseJsonObject, "Error parsing YAML. : Line 21, column 0: Expected a 'block end' but found: scalar : ", "invalid-materials.gocd.yaml");
-    // }
 
     @Test
     public void shouldRespondBadRequestToParseDirectoryRequestWhenDirectoryIsNotSpecified() throws UnhandledRequestTypeException {
