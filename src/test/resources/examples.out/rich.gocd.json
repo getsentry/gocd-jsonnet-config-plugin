@@ -4,7 +4,7 @@
   "environments": [],
   "pipelines": [
     {
-      "location": "rich.gocd.yaml",
+      "location": "rich.gocd.jsonnet",
       "name": "pipe2",
       "group": "rich",
       "label_template": "${mygit[:8]}",

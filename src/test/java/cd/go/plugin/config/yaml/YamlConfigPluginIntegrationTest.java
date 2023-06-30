@@ -56,10 +56,10 @@ public class YamlConfigPluginIntegrationTest {
         DefaultGoPluginApiRequest request = new DefaultGoPluginApiRequest("configrepo", "2.0", ConfigRepoMessages.REQ_PARSE_CONTENT);
 
         StringWriter w = new StringWriter();
-        IOUtils.copy(getResourceAsStream("examples/simple.gocd.yaml"), w);
+        IOUtils.copy(getResourceAsStream("examples/simple.gocd.jsonnet"), w);
         request.setRequestBody(gson.toJson(
                 Collections.singletonMap("contents",
-                        Collections.singletonMap("simple.gocd.yaml", w.toString())
+                        Collections.singletonMap("simple.gocd.jsonnet", w.toString())
                 )
         ));
 
@@ -79,10 +79,10 @@ public class YamlConfigPluginIntegrationTest {
         final Gson gson = new Gson();
         DefaultGoPluginApiRequest request = new DefaultGoPluginApiRequest("configrepo", "3.0", ConfigRepoMessages.REQ_CONFIG_FILES);
         FileUtils.copyInputStreamToFile(
-                getResourceAsStream("/examples/simple.gocd.yaml"), Files.createFile(tempDir.resolve("valid.gocd.yaml")).toFile()
+                getResourceAsStream("/examples/simple.gocd.jsonnet"), Files.createFile(tempDir.resolve("valid.gocd.jsonnet")).toFile()
         );
         FileUtils.copyInputStreamToFile(
-                getResourceAsStream("/examples/simple-invalid.gocd.yaml"), Files.createFile(tempDir.resolve("invalid.gocd.yaml")).toFile()
+                getResourceAsStream("/examples/simple-invalid.gocd.jsonnet"), Files.createFile(tempDir.resolve("invalid.gocd.jsonnet")).toFile()
         );
 
         request.setRequestBody(gson.toJson(
@@ -94,8 +94,8 @@ public class YamlConfigPluginIntegrationTest {
 
         JsonArray files = getJsonObjectFromResponse(response).get("files").getAsJsonArray();
         assertThat(files.size(), is(2));
-        assertTrue(files.contains(new JsonPrimitive("valid.gocd.yaml")));
-        assertTrue(files.contains(new JsonPrimitive("invalid.gocd.yaml")));
+        assertTrue(files.contains(new JsonPrimitive("valid.gocd.jsonnet")));
+        assertTrue(files.contains(new JsonPrimitive("invalid.gocd.jsonnet")));
     }
 
     @Test
@@ -116,8 +116,8 @@ public class YamlConfigPluginIntegrationTest {
         JsonElement pattern = responseJsonObject.get("file_pattern");
         assertNotNull(pattern);
         JsonObject patternAsJsonObject = pattern.getAsJsonObject();
-        assertThat(patternAsJsonObject.get("display-name").getAsString(), is("Go YAML files pattern"));
-        assertThat(patternAsJsonObject.get("default-value").getAsString(), is("**/*.gocd.yaml,**/*.gocd.yml"));
+        assertThat(patternAsJsonObject.get("display-name").getAsString(), is("Go Jsonnet files pattern"));
+        assertThat(patternAsJsonObject.get("default-value").getAsString(), is("**/*.gocd.jsonnet"));
         assertThat(patternAsJsonObject.get("required").getAsBoolean(), is(false));
         assertThat(patternAsJsonObject.get("secure").getAsBoolean(), is(false));
         assertThat(patternAsJsonObject.get("display-order").getAsInt(), is(0));
@@ -208,29 +208,7 @@ public class YamlConfigPluginIntegrationTest {
         JsonObject responseJsonObject = getJsonObjectFromResponse(response);
         JsonArray pipelines = responseJsonObject.get("pipelines").getAsJsonArray();
         assertThat(pipelines.size(), is(0));
-        assertFirstError(responseJsonObject, "Failed to parse pipeline pipe1; expected a hash of pipeline materials", "simple-invalid.gocd.yaml");
-    }
-
-    @Test
-    public void shouldRespondSuccessWithErrorMessagesToParseDirectoryRequestWhenDuplicateKeysCaseFile() throws UnhandledRequestTypeException, IOException {
-        GoPluginApiResponse response = parseAndGetResponseForDir(setupCase("duplicate-materials"));
-
-        assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
-        JsonObject responseJsonObject = getJsonObjectFromResponse(response);
-        JsonArray pipelines = responseJsonObject.get("pipelines").getAsJsonArray();
-        assertThat(pipelines.size(), is(0));
-        assertFirstError(responseJsonObject, "Line 9, column 20: Duplicate key found 'upstream'", "duplicate-materials.gocd.yaml");
-    }
-
-    @Test
-    public void shouldRespondSuccessWithErrorMessagesToParseDirectoryRequestWhenParsingErrorCaseFile() throws UnhandledRequestTypeException, IOException {
-        GoPluginApiResponse response = parseAndGetResponseForDir(setupCase("invalid-materials"));
-
-        assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
-        JsonObject responseJsonObject = getJsonObjectFromResponse(response);
-        JsonArray pipelines = responseJsonObject.get("pipelines").getAsJsonArray();
-        assertThat(pipelines.size(), is(0));
-        assertFirstError(responseJsonObject, "Error parsing YAML. : Line 21, column 0: Expected a 'block end' but found: scalar : ", "invalid-materials.gocd.yaml");
+        assertFirstError(responseJsonObject, "Failed to parse pipeline pipe1; expected a hash of pipeline materials", "simple-invalid.gocd.jsonnet");
     }
 
     @Test
@@ -354,8 +332,8 @@ public class YamlConfigPluginIntegrationTest {
 
     @Test
     public void shouldUpdateTargetVersionWhenItIsTheSameAcrossAllFiles() throws Exception {
-        FileUtils.copyInputStreamToFile(getResourceAsStream("/parts/roots/version_2.yaml"), Files.createFile(tempDir.resolve("v2_1.gocd.yaml")).toFile());
-        FileUtils.copyInputStreamToFile(getResourceAsStream("/parts/roots/version_2.yaml"), Files.createFile(tempDir.resolve("v2_2.gocd.yaml")).toFile());
+        FileUtils.copyInputStreamToFile(getResourceAsStream("/parts/roots/version_2.jsonnet"), Files.createFile(tempDir.resolve("v2_1.gocd.jsonnet")).toFile());
+        FileUtils.copyInputStreamToFile(getResourceAsStream("/parts/roots/version_2.jsonnet"), Files.createFile(tempDir.resolve("v2_2.gocd.jsonnet")).toFile());
 
         GoPluginApiResponse response = parseAndGetResponseForDir(tempDir.toFile());
         assertNoError(getJsonObjectFromResponse(response));
@@ -363,9 +341,9 @@ public class YamlConfigPluginIntegrationTest {
 
     @Test
     public void shouldUpdateTargetVersionWhenItIsTheDefaultOrMissingAcrossAllPipelinesAndEnvironments() throws Exception {
-        FileUtils.copyInputStreamToFile(getResourceAsStream("/parts/roots/version_1.yaml"), Files.createFile(tempDir.resolve("v1_1.gocd.yaml")).toFile());
-        FileUtils.copyInputStreamToFile(getResourceAsStream("/parts/roots/version_not_present.yaml"), Files.createFile(tempDir.resolve("v1_not_present.gocd.yaml")).toFile());
-        FileUtils.copyInputStreamToFile(getResourceAsStream("/parts/roots/version_1.yaml"), Files.createFile(tempDir.resolve("v1_2.gocd.yaml")).toFile());
+        FileUtils.copyInputStreamToFile(getResourceAsStream("/parts/roots/version_1.jsonnet"), Files.createFile(tempDir.resolve("v1_1.gocd.jsonnet")).toFile());
+        FileUtils.copyInputStreamToFile(getResourceAsStream("/parts/roots/version_not_present.jsonnet"), Files.createFile(tempDir.resolve("v1_not_present.gocd.jsonnet")).toFile());
+        FileUtils.copyInputStreamToFile(getResourceAsStream("/parts/roots/version_1.jsonnet"), Files.createFile(tempDir.resolve("v1_2.gocd.jsonnet")).toFile());
 
         GoPluginApiResponse response = parseAndGetResponseForDir(tempDir.toFile());
         assertNoError(getJsonObjectFromResponse(response));
@@ -373,14 +351,14 @@ public class YamlConfigPluginIntegrationTest {
 
     @Test
     public void shouldFailToUpdateTargetVersionWhenItIs_NOT_TheSameAcrossAllFiles() throws Exception {
-        FileUtils.copyInputStreamToFile(getResourceAsStream("/parts/roots/version_1.yaml"), Files.createFile(tempDir.resolve("v1_1.gocd.yaml")).toFile());
-        FileUtils.copyInputStreamToFile(getResourceAsStream("/parts/roots/version_1.yaml"), Files.createFile(tempDir.resolve("v1_2.gocd.yaml")).toFile());
-        FileUtils.copyInputStreamToFile(getResourceAsStream("/parts/roots/version_2.yaml"), Files.createFile(tempDir.resolve("v2_1.gocd.yaml")).toFile());
+        FileUtils.copyInputStreamToFile(getResourceAsStream("/parts/roots/version_1.jsonnet"), Files.createFile(tempDir.resolve("v1_1.gocd.jsonnet")).toFile());
+        FileUtils.copyInputStreamToFile(getResourceAsStream("/parts/roots/version_1.jsonnet"), Files.createFile(tempDir.resolve("v1_2.gocd.jsonnet")).toFile());
+        FileUtils.copyInputStreamToFile(getResourceAsStream("/parts/roots/version_2.jsonnet"), Files.createFile(tempDir.resolve("v2_1.gocd.jsonnet")).toFile());
 
         GoPluginApiResponse response = parseAndGetResponseForDir(tempDir.toFile());
         String expectedFailureMessage = "java.lang.RuntimeException: Versions across files are not unique. Found" +
                 " versions: [1, 2]. There can only be one version across the whole repository.";
-        assertFirstError(getJsonObjectFromResponse(response), expectedFailureMessage, "YAML config plugin");
+        assertFirstError(getJsonObjectFromResponse(response), expectedFailureMessage, "Jsonnet config plugin");
     }
 
     @Test
@@ -409,12 +387,12 @@ public class YamlConfigPluginIntegrationTest {
     }
 
     private File setupCase(String caseName) throws IOException {
-        return setupCase(caseName, "gocd.yaml");
+        return setupCase(caseName, "gocd.jsonnet");
     }
 
     private File setupCase(String caseName, String extension) throws IOException {
         File simpleFile = Files.createFile(tempDir.resolve(caseName + "." + extension)).toFile();
-        FileUtils.copyInputStreamToFile(getResourceAsStream("examples/" + caseName + ".gocd.yaml"), simpleFile);
+        FileUtils.copyInputStreamToFile(getResourceAsStream("examples/" + caseName + ".gocd.jsonnet"), simpleFile);
         return tempDir.toFile();
     }
 

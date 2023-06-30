@@ -53,7 +53,7 @@
         }]
       }]
     }],
-    "location": "aliases.gocd.yaml"
+    "location": "aliases.gocd.jsonnet"
   }],
   "errors": []
 }
