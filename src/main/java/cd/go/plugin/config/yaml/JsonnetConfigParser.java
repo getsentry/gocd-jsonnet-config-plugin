@@ -76,7 +76,6 @@ public class JsonnetConfigParser extends YamlConfigParser {
         String inputString = new String(input.readAllBytes());
         return compileJsonnet("--exec", inputString);
     }
-
     
     /** 
      * Compile jsonnet using the jrsonnet command line tool.
