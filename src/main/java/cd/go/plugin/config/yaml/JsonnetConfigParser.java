@@ -52,9 +52,8 @@ public class JsonnetConfigParser extends YamlConfigParser {
      */
     @Override
     public void parseStream(JsonConfigCollection result, InputStream input, String location) {
-        InputStream jsonInputStream = null;
         try {
-            jsonInputStream = compileJsonnet(input);
+            InputStream jsonInputStream = compileJsonnet(input);
             super.parseStream(result, jsonInputStream, location);
         } catch (NullPointerException ex) {
             result.addError("File matching GoCD Jsonnet pattern disappeared", location);
@@ -62,15 +61,6 @@ public class JsonnetConfigParser extends YamlConfigParser {
             result.addError("Error while reading Jsonnet file", location);
         } catch (JsonnetEvalException ex) {
             result.addError(ex.getMessage(), location);
-        } finally {
-            // Close the input stream if it was opened
-            if (jsonInputStream != null) {
-                try {
-                    jsonInputStream.close();
-                } catch (IOException ex) {
-                    result.addError("Error while closing Jsonnet file", location);
-                }
-            }
         }
     }
 
