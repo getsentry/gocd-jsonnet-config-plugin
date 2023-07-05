@@ -1,0 +1,48 @@
+name: "Release"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release (v1.0.0)
+        required: true
+
+jobs:
+  release:
+    name: "Release"
+
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: gradle/gradle-build-action@v2
+      - run: gradle clean test
+      - run: gradle clean assemble -Dorg.gradle.project.version="${{ github.event.inputs.version }}"
+      - name: "Create release"
+        uses: "actions/github-script@v6"
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const filename = `jsonnet-config-plugin-${process.env.VERSION}.jar`
+              const release = await github.rest.repos.createRelease({
+                draft: false,
+                generate_release_notes: true,
+                name: process.env.VERSION,
+                owner: context.repo.owner,
+                prerelease: false,
+                repo: context.repo.repo,
+                tag_name: process.env.VERSION,
+              });
+              await github.rest.repos.uploadReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: release.data.id,
+                name: filename,
+                data: await fs.readFileSync(`build/libs/${filename}`),
+              });
+            } catch (error) {
+              core.setFailed(error.message);
+            }

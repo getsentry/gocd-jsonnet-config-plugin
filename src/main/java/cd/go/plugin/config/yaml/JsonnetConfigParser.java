@@ -40,7 +40,7 @@ public class JsonnetConfigParser extends YamlConfigParser {
     private InputStream compileJsonnet(String filePath) {
         InputStream jsonInputStream = null;
         try {
-            ProcessBuilder pb = new ProcessBuilder("jrsonnet", filePath, "--format", "yaml");
+            ProcessBuilder pb = new ProcessBuilder("jsonnet", filePath);
             Process p = pb.start();
             int exitCode = p.waitFor();
             if (exitCode != 0) {
@@ -59,7 +59,7 @@ public class JsonnetConfigParser extends YamlConfigParser {
         InputStream jsonInputStream = null;
         try {
             String inputString = new String(input.readAllBytes());
-            ProcessBuilder pb = new ProcessBuilder("jrsonnet", "--exec", inputString, "--format", "yaml");
+            ProcessBuilder pb = new ProcessBuilder("jsonnet", "--exec", inputString);
             Process p = pb.start();
             int exitCode = p.waitFor();
             if (exitCode != 0) {
