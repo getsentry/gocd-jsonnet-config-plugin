@@ -29,25 +29,15 @@ public class JsonnetConfigParser extends YamlConfigParser {
     public JsonConfigCollection parseFiles(File baseDir, String[] files) {
         JsonConfigCollection collection = new JsonConfigCollection();
         for (String file : files) {
-            InputStream input = null;
             try {
                 File filePath = new File(baseDir, file);
-                input = compileJsonnet(filePath.toString());
+                InputStream input = compileJsonnet(filePath.toString());
                 // Calling YamlConfigParser's parseStream method (instead of the overridden one below)
                 super.parseStream(collection, input, file);
             } catch (NullPointerException e) {
                 collection.addError("File matching GoCD Jsonnet pattern disappeared", file);
             } catch (JsonnetEvalException e) {
                 collection.addError(e.getMessage(), file);
-            } finally {
-                // Close the input stream if it was opened
-                if (input != null) {
-                    try {
-                        input.close();
-                    } catch (IOException e) {
-                        collection.addError("Error while closing Jsonnet file", file);
-                    }
-                }
             }
         }
         return collection;   
