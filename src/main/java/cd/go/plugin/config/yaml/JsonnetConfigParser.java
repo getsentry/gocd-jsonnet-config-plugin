@@ -7,8 +7,10 @@ import java.io.InputStream;
 import cd.go.plugin.config.yaml.transforms.RootTransform;
 
 public class JsonnetConfigParser extends YamlConfigParser {
-    public JsonnetConfigParser() {
+    private String jsonnetCommand;
+    public JsonnetConfigParser(String jsonnetCommand) {
         super(new RootTransform());
+        this.jsonnetCommand = jsonnetCommand;
     }
 
     @Override
@@ -40,7 +42,7 @@ public class JsonnetConfigParser extends YamlConfigParser {
     private InputStream compileJsonnet(String filePath) {
         InputStream jsonInputStream = null;
         try {
-            ProcessBuilder pb = new ProcessBuilder("jsonnet", filePath);
+            ProcessBuilder pb = new ProcessBuilder(jsonnetCommand, filePath);
             Process p = pb.start();
             int exitCode = p.waitFor();
             if (exitCode != 0) {
@@ -59,7 +61,7 @@ public class JsonnetConfigParser extends YamlConfigParser {
         InputStream jsonInputStream = null;
         try {
             String inputString = new String(input.readAllBytes());
-            ProcessBuilder pb = new ProcessBuilder("jsonnet", "--exec", inputString);
+            ProcessBuilder pb = new ProcessBuilder(jsonnetCommand, "--exec", inputString);
             Process p = pb.start();
             int exitCode = p.waitFor();
             if (exitCode != 0) {
