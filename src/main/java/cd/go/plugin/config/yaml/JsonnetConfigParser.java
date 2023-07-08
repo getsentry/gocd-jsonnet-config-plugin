@@ -10,12 +10,10 @@ import cd.go.plugin.config.yaml.transforms.RootTransform;
  * Extends {@link YamlConfigParser} to parse jsonnet files into a JsonConfigCollection.
  */
 public class JsonnetConfigParser extends YamlConfigParser {
-
-    /**
-     * Create a new JsonnetConfigParser.
-     */
-    public JsonnetConfigParser() {
+    private String jsonnetCommand;
+    public JsonnetConfigParser(String jsonnetCommand) {
         super(new RootTransform());
+        this.jsonnetCommand = jsonnetCommand;
     }
 
     /**
@@ -86,7 +84,7 @@ public class JsonnetConfigParser extends YamlConfigParser {
      */
     private InputStream compileJsonnet(String... command) throws JsonnetEvalException {
         String[] commandWithArgs = new String[command.length + 1];
-        commandWithArgs[0] = "jrsonnet";
+        commandWithArgs[0] = jsonnetCommand;
         System.arraycopy(command, 0, commandWithArgs, 1, command.length);
         try {
             ProcessBuilder pb = new ProcessBuilder(commandWithArgs);
