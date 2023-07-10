@@ -31,6 +31,7 @@ import static com.thoughtworks.go.plugin.api.response.DefaultGoPluginApiResponse
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class YamlConfigPluginIntegrationTest {
@@ -209,6 +210,17 @@ public class YamlConfigPluginIntegrationTest {
         JsonArray pipelines = responseJsonObject.get("pipelines").getAsJsonArray();
         assertThat(pipelines.size(), is(0));
         assertFirstError(responseJsonObject, "Failed to parse pipeline pipe1; expected a hash of pipeline materials", "simple-invalid.gocd.jsonnet");
+    }
+
+    @Test
+    public void shouldRespondSuccessWithErrorMessagesToParseDirectoryRequestWhenParsingErrorCaseFile() throws UnhandledRequestTypeException, IOException {
+        GoPluginApiResponse response = parseAndGetResponseForDir(setupCase("invalid-materials"));
+
+        assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
+        JsonObject responseJsonObject = getJsonObjectFromResponse(response);
+        JsonArray pipelines = responseJsonObject.get("pipelines").getAsJsonArray();
+        assertThat(pipelines.size(), is(0));
+        assertFirstErrorContains(responseJsonObject, "invalid-materials.gocd.jsonnet:28:37: Could not lex the character '`'", "invalid-materials.gocd.jsonnet");
     }
 
     @Test
@@ -414,6 +426,12 @@ public class YamlConfigPluginIntegrationTest {
     private void assertFirstError(JsonObject responseJsonObject, String expectedMessage, String expectedLocation) {
         JsonArray errors = (JsonArray) responseJsonObject.get("errors");
         assertThat(errors.get(0).getAsJsonObject().getAsJsonPrimitive("message").getAsString(), is(expectedMessage));
+        assertThat(errors.get(0).getAsJsonObject().getAsJsonPrimitive("location").getAsString(), is(expectedLocation));
+    }
+
+    private void assertFirstErrorContains(JsonObject responseJsonObject, String expectedMessage, String expectedLocation) {
+        JsonArray errors = (JsonArray) responseJsonObject.get("errors");
+        assertTrue(errors.get(0).getAsJsonObject().getAsJsonPrimitive("message").getAsString().contains(expectedMessage));
         assertThat(errors.get(0).getAsJsonObject().getAsJsonPrimitive("location").getAsString(), is(expectedLocation));
     }
 
