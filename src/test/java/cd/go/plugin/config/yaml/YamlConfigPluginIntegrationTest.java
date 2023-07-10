@@ -220,7 +220,7 @@ public class YamlConfigPluginIntegrationTest {
         JsonObject responseJsonObject = getJsonObjectFromResponse(response);
         JsonArray pipelines = responseJsonObject.get("pipelines").getAsJsonArray();
         assertThat(pipelines.size(), is(0));
-        assertFirstErrorContains(responseJsonObject, "invalid-materials.gocd.jsonnet:28:37", "invalid-materials.gocd.jsonnet");
+        assertFirstErrorContains(responseJsonObject, "invalid-materials.gocd.jsonnet:28:37 Could not lex the character '`'", "invalid-materials.gocd.jsonnet");
     }
 
     @Test
@@ -431,7 +431,6 @@ public class YamlConfigPluginIntegrationTest {
 
     private void assertFirstErrorContains(JsonObject responseJsonObject, String expectedMessage, String expectedLocation) {
         JsonArray errors = (JsonArray) responseJsonObject.get("errors");
-        System.out.println(errors.get(0).getAsJsonObject().getAsJsonPrimitive("message").getAsString());
         assertTrue(errors.get(0).getAsJsonObject().getAsJsonPrimitive("message").getAsString().contains(expectedMessage));
         assertThat(errors.get(0).getAsJsonObject().getAsJsonPrimitive("location").getAsString(), is(expectedLocation));
     }
