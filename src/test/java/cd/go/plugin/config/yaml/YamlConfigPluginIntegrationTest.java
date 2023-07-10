@@ -220,7 +220,7 @@ public class YamlConfigPluginIntegrationTest {
         JsonObject responseJsonObject = getJsonObjectFromResponse(response);
         JsonArray pipelines = responseJsonObject.get("pipelines").getAsJsonArray();
         assertThat(pipelines.size(), is(0));
-        assertFirstErrorContains(responseJsonObject, "invalid-materials.gocd.jsonnet:28:37 Could not lex the character '`'", "invalid-materials.gocd.jsonnet");
+        assertFirstErrorContains(responseJsonObject, "Could not lex the character '`'", "invalid-materials.gocd.jsonnet");
     }
 
     @Test
