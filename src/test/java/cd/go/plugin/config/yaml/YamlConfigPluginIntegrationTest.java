@@ -431,6 +431,7 @@ public class YamlConfigPluginIntegrationTest {
 
     private void assertFirstErrorContains(JsonObject responseJsonObject, String expectedMessage, String expectedLocation) {
         JsonArray errors = (JsonArray) responseJsonObject.get("errors");
+        System.out.println(errors.get(0).getAsJsonObject().getAsJsonPrimitive("message").getAsString());
         assertTrue(errors.get(0).getAsJsonObject().getAsJsonPrimitive("message").getAsString().contains(expectedMessage));
         assertThat(errors.get(0).getAsJsonObject().getAsJsonPrimitive("location").getAsString(), is(expectedLocation));
     }
