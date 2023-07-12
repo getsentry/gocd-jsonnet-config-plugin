@@ -469,7 +469,7 @@ public class YamlConfigPluginIntegrationTest {
     }
 
     @Test
-    public void shouldRespondSuccessWithErrorMessageWhenJsonnetFileIsMissing() throws UnhandledRequestTypeException, IOException {
+    public void shouldRespondSuccessWithRuntimeErrorMessageWhenJsonnetFileIsMissing() throws UnhandledRequestTypeException, IOException {
         File rootDir = setupCase("imported");
         DefaultGoPluginApiRequest request = new DefaultGoPluginApiRequest("configrepo", "2.0", REQ_PLUGIN_SETTINGS_CHANGED);
         request.setRequestBody("{\"root_directory\": \"" + rootDir.getAbsolutePath() + "\"}");
@@ -477,7 +477,7 @@ public class YamlConfigPluginIntegrationTest {
 
         GoPluginApiResponse response = parseAndGetResponseForDir(rootDir);
         assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
-        assertFirstErrorContains(getJsonObjectFromResponse(response), "failed to load jsonnetfile", "imported.gocd.jsonnet");
+        assertFirstErrorContains(getJsonObjectFromResponse(response), "RUNTIME ERROR: couldn't open import", "imported.gocd.jsonnet");
     }
 
     private File setupCase(String caseName) throws IOException {

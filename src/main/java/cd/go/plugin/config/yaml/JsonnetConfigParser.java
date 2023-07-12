@@ -108,9 +108,9 @@ public class JsonnetConfigParser extends YamlConfigParser {
     }
 
     private void bundleJsonnet() {
-        // Check if the root directory exists
-        File rootDir = new File(rootDirectory);
-        if (!rootDir.exists()) {
+        // Check if <rootDirectory>/jsonnetfile.json exists
+        File jsonnetFile = new File(rootDirectory + File.separator + "jsonnetfile.json");
+        if (!jsonnetFile.exists()) {
             return;
         }
         try {
