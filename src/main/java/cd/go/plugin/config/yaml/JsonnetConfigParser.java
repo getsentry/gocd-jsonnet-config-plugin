@@ -10,7 +10,7 @@ import cd.go.plugin.config.yaml.transforms.RootTransform;
  * Extends {@link YamlConfigParser} to parse jsonnet files into a JsonConfigCollection.
  */
 public class JsonnetConfigParser extends YamlConfigParser {
-    private static final String VENDOR_NAME = "vendor";
+    private static final String VENDOR_TREE_NAME = "vendor";
     private String jsonnetCommand;
     private String rootDirectory;
     public JsonnetConfigParser(String jsonnetCommand, String rootDirectory) {
@@ -91,7 +91,7 @@ public class JsonnetConfigParser extends YamlConfigParser {
         String[] commandWithArgs = new String[command.length + 3];
         commandWithArgs[0] = jsonnetCommand;
         commandWithArgs[commandWithArgs.length - 2] = "-J";
-        commandWithArgs[commandWithArgs.length - 1] = rootDirectory + File.separator + VENDOR_NAME;
+        commandWithArgs[commandWithArgs.length - 1] = rootDirectory + File.separator + VENDOR_TREE_NAME;
         System.arraycopy(command, 0, commandWithArgs, 1, command.length);
         try {
             ProcessBuilder pb = new ProcessBuilder(commandWithArgs);
