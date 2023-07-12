@@ -141,7 +141,8 @@ public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
             ParsedRequest parsed = ParsedRequest.parse(request);
 
             String jsonnetCommand = getJsonnetCommand();
-            JsonnetConfigParser parser = new JsonnetConfigParser(jsonnetCommand);
+            String rootDirectory = getRootDirectory();
+            JsonnetConfigParser parser = new JsonnetConfigParser(jsonnetCommand, rootDirectory);
             Map<String, String> contents = parsed.getParam("contents");
             JsonConfigCollection result = new JsonConfigCollection();
             contents.forEach((filename, content) -> {
@@ -176,7 +177,8 @@ public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
             String[] files = scanForConfigFiles(parsed, baseDir);
 
             String jsonnetCommand = getJsonnetCommand();
-            JsonnetConfigParser parser = new JsonnetConfigParser(jsonnetCommand);
+            String rootDirectory = getRootDirectory();
+            JsonnetConfigParser parser = new JsonnetConfigParser(jsonnetCommand, rootDirectory);
 
             JsonConfigCollection config = parser.parseFiles(baseDir, files);
             config.updateTargetVersionFromFiles();

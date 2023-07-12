@@ -10,10 +10,13 @@ import cd.go.plugin.config.yaml.transforms.RootTransform;
  * Extends {@link YamlConfigParser} to parse jsonnet files into a JsonConfigCollection.
  */
 public class JsonnetConfigParser extends YamlConfigParser {
+    private static final String VENDOR_NAME = "vendor";
     private String jsonnetCommand;
-    public JsonnetConfigParser(String jsonnetCommand) {
+    private String rootDirectory;
+    public JsonnetConfigParser(String jsonnetCommand, String rootDirectory) {
         super(new RootTransform());
         this.jsonnetCommand = jsonnetCommand;
+        this.rootDirectory = rootDirectory;
     }
 
     /**
@@ -28,6 +31,7 @@ public class JsonnetConfigParser extends YamlConfigParser {
         JsonConfigCollection collection = new JsonConfigCollection();
         for (String file : files) {
             try {
+                bundleJsonnet();
                 File filePath = new File(baseDir, file);
                 InputStream input = compileJsonnet(filePath.toString());
                 // Calling YamlConfigParser's parseStream method (instead of the overridden one below)
@@ -51,6 +55,7 @@ public class JsonnetConfigParser extends YamlConfigParser {
     @Override
     public void parseStream(JsonConfigCollection result, InputStream input, String location) {
         try {
+            bundleJsonnet();
             InputStream jsonInputStream = compileJsonnet(input);
             super.parseStream(result, jsonInputStream, location);
         } catch (NullPointerException ex) {
@@ -83,8 +88,10 @@ public class JsonnetConfigParser extends YamlConfigParser {
      * @throws JsonnetEvalException if jrsonnet exits with an error
      */
     private InputStream compileJsonnet(String... command) throws JsonnetEvalException {
-        String[] commandWithArgs = new String[command.length + 1];
+        String[] commandWithArgs = new String[command.length + 3];
         commandWithArgs[0] = jsonnetCommand;
+        commandWithArgs[commandWithArgs.length - 2] = "-J";
+        commandWithArgs[commandWithArgs.length - 1] = rootDirectory + File.separator + VENDOR_NAME;
         System.arraycopy(command, 0, commandWithArgs, 1, command.length);
         try {
             ProcessBuilder pb = new ProcessBuilder(commandWithArgs);
@@ -97,6 +104,26 @@ public class JsonnetConfigParser extends YamlConfigParser {
             return p.getInputStream();
         } catch (Exception e) {
             throw new JsonnetEvalException("Error while evaluating jsonnet: " + e.getMessage());
+        }
+    }
+
+    private void bundleJsonnet() {
+        // Check if the root directory exists
+        File rootDir = new File(rootDirectory);
+        if (!rootDir.exists()) {
+            return;
+        }
+        try {
+            ProcessBuilder pb = new ProcessBuilder("jb", "install");
+            pb.directory(new File(rootDirectory));
+            Process p = pb.start();
+            int exitCode = p.waitFor();
+            if (exitCode != 0) {
+                String error = new String(p.getErrorStream().readAllBytes());
+                throw new Exception(error);
+            }
+        } catch (Exception e) {
+            throw new JsonnetEvalException("Error while bundling jsonnet: " + e.getMessage());
         }
     }
 }
