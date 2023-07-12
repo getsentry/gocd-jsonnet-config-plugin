@@ -433,6 +433,42 @@ public class YamlConfigPluginIntegrationTest {
     }
 
     @Test
+    public void shouldRespondSuccessToParseDirectoryRequestWhenImportedCaseFile() throws UnhandledRequestTypeException, IOException {
+        File rootDir = setupCase("imported");
+        File jsonnetFile = new File(rootDir, "jsonnetfile.json");
+        FileUtils.copyInputStreamToFile(getResourceAsStream("examples/jsonnetfile.json"), jsonnetFile);
+        DefaultGoPluginApiRequest request = new DefaultGoPluginApiRequest("configrepo", "2.0", REQ_PLUGIN_SETTINGS_CHANGED);
+        request.setRequestBody("{\"root_directory\": \"" + rootDir.getAbsolutePath() + "\"}");
+        plugin.handle(request);
+
+        GoPluginApiResponse response = parseAndGetResponseForDir(rootDir);
+        assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
+        JsonObject responseJsonObject = getJsonObjectFromResponse(response);
+        assertNoError(responseJsonObject);
+
+        JsonObject expected = (JsonObject) readJsonObject("examples.out/imported.gocd.json");
+        assertThat(responseJsonObject, is(new JsonObjectMatcher(expected)));
+    }
+
+    @Test
+    public void shouldRespondSuccessToParseNestedDirectoryRequestWhenImportedCaseFile() throws UnhandledRequestTypeException, IOException {
+        File rootDir = setupCaseNested("imported", "nested");
+        File jsonnetFile = new File(rootDir, "jsonnetfile.json");
+        FileUtils.copyInputStreamToFile(getResourceAsStream("examples/jsonnetfile.json"), jsonnetFile);
+        DefaultGoPluginApiRequest request = new DefaultGoPluginApiRequest("configrepo", "2.0", REQ_PLUGIN_SETTINGS_CHANGED);
+        request.setRequestBody("{\"root_directory\": \"" + rootDir.getAbsolutePath() + "\"}");
+        plugin.handle(request);
+
+        GoPluginApiResponse response = parseAndGetResponseForDir(rootDir);
+        assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
+        JsonObject responseJsonObject = getJsonObjectFromResponse(response);
+        assertNoError(responseJsonObject);
+
+        JsonObject expected = (JsonObject) readJsonObject("examples.out/nested-imported.gocd.json");
+        assertThat(responseJsonObject, is(new JsonObjectMatcher(expected)));
+    }
+
+    @Test
     public void shouldRespondSuccessWithErrorMessageWhenJsonnetFileIsMissing() throws UnhandledRequestTypeException, IOException {
         File rootDir = setupCase("imported");
         DefaultGoPluginApiRequest request = new DefaultGoPluginApiRequest("configrepo", "2.0", REQ_PLUGIN_SETTINGS_CHANGED);

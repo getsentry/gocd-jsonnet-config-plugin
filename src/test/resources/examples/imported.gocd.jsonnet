@@ -1,8 +1,8 @@
-local tasks = import "github.com/getsentry/gocd-jsonnet/v1.0.0/gocd-tasks.libsonnet";
+local utils = import "github.com/getsentry/test-jsonnet/libs/utils.libsonnet";
 {
   "pipelines": {
     "pipe1": {
-      "group": "simple" + tasks.script("test"),
+      "group": utils.identity("simple"),
       "materials": {
         "mygit": {
           "git": "http://my.example.org/mygit.git"

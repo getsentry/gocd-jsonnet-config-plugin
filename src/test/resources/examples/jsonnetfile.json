@@ -4,11 +4,11 @@
     {
       "source": {
         "git": {
-          "remote": "https://github.com/getsentry/gocd-jsonnet.git",
-          "subdir": "v1.0.0"
+          "remote": "https://github.com/getsentry/test-jsonnet.git",
+          "subdir": "libs"
         }
       },
-      "version": "main"
+      "version": "v1.0.0"
     }
   ],
   "legacyImports": true
