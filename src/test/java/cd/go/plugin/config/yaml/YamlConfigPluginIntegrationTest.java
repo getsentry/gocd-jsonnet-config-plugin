@@ -509,7 +509,7 @@ public class YamlConfigPluginIntegrationTest {
     }
 
     private void assertNoError(JsonObject responseJsonObject) {
-        System.err.println(responseJsonObject.get("errors"));
+        System.out.println(responseJsonObject.get("errors"));
         assertThat(responseJsonObject.get("errors"), Is.<JsonElement>is(new JsonArray()));
     }
 
