@@ -11,8 +11,16 @@ import cd.go.plugin.config.yaml.transforms.RootTransform;
  */
 public class JsonnetConfigParser extends YamlConfigParser {
     private static final String VENDOR_TREE_NAME = "vendor";
+    private static final String JSONNET_FILE_NAME = "jsonnetfile.json";
     private String jsonnetCommand;
     private String rootDirectory;
+
+    /**
+     * Create a new JsonnetConfigParser.
+     * @param jsonnetCommand The command to run to execute jsonnet
+     * @param rootDirectory The root directory to resolve relative paths against
+     * @see YamlConfigParser#YamlConfigParser(RootTransform)
+     */
     public JsonnetConfigParser(String jsonnetCommand, String rootDirectory) {
         super(new RootTransform());
         this.jsonnetCommand = jsonnetCommand;
@@ -107,10 +115,14 @@ public class JsonnetConfigParser extends YamlConfigParser {
         }
     }
 
+    /**
+     * Run the jsonnet-bundler to bundle the jsonnet dependencies.
+     */
     private void bundleJsonnet() {
         // Check if <rootDirectory>/jsonnetfile.json exists
-        File jsonnetFile = new File(rootDirectory + File.separator + "jsonnetfile.json");
+        File jsonnetFile = new File(rootDirectory + File.separator + JSONNET_FILE_NAME);
         if (!jsonnetFile.exists()) {
+            // If the jsonnetfile.json doesn't exist, don't run the bundler
             return;
         }
         try {
