@@ -107,7 +107,7 @@ public class JsonnetConfigParser extends YamlConfigParser {
             int exitCode = p.waitFor();
             if (exitCode != 0) {
                 String error = new String(p.getErrorStream().readAllBytes());
-                throw new Exception("Jsonnet exited with an error: " + error);
+                throw new Exception("Jsonnet exited with an error: " + error + "\n" + "Command: " + String.join(" ", commandWithArgs));
             }
             return p.getInputStream();
         } catch (Exception e) {
