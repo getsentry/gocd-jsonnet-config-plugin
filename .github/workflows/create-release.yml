@@ -18,7 +18,9 @@ jobs:
       - name: Install go
         uses: actions/setup-go@v4
       - name: Install Jsonnet
-        run: go install github.com/google/go-jsonnet/cmd/jsonnet@latest
+        run: |
+          go install github.com/google/go-jsonnet/cmd/jsonnet@latest
+          go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
       - uses: gradle/gradle-build-action@v2
       - run: gradle clean test
       - run: gradle clean assemble -Dorg.gradle.project.version="${{ github.event.inputs.version }}"
