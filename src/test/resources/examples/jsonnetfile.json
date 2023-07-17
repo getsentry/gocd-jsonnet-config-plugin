@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "dependencies": [
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/getsentry/test-jsonnet.git",
+          "subdir": "libs"
+        }
+      },
+      "version": "v1.0.0"
+    }
+  ],
+  "legacyImports": true
+}
