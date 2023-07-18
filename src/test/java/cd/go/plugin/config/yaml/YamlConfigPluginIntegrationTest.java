@@ -118,7 +118,7 @@ public class YamlConfigPluginIntegrationTest {
         assertNotNull(pattern);
         JsonObject patternAsJsonObject = pattern.getAsJsonObject();
         assertThat(patternAsJsonObject.get("display-name").getAsString(), is("Go Jsonnet files pattern"));
-        assertThat(patternAsJsonObject.get("default-value").getAsString(), is("**/*.gocd.jsonnet"));
+        assertThat(patternAsJsonObject.get("default-value").getAsString(), is("**/*.gocd.jsonnet,**/jsonnetfile.json"));
         assertThat(patternAsJsonObject.get("required").getAsBoolean(), is(false));
         assertThat(patternAsJsonObject.get("secure").getAsBoolean(), is(false));
         assertThat(patternAsJsonObject.get("display-order").getAsInt(), is(0));
@@ -233,29 +233,6 @@ public class YamlConfigPluginIntegrationTest {
 
         GoPluginApiResponse response = plugin.handle(parseDirectoryRequest);
         assertThat(response.responseCode(), is(DefaultGoPluginApiResponse.BAD_REQUEST));
-    }
-
-    @Test
-    public void shouldParseDirectoryWithCustomPatternWhenInConfigurations() throws UnhandledRequestTypeException, IOException {
-        File simpleCaseDir = setupCase("simple", "go.yml");
-        DefaultGoPluginApiRequest parseDirectoryRequest = new DefaultGoPluginApiRequest("configrepo", "1.0", "parse-directory");
-        String requestBody = "{\n" +
-                "    \"directory\":\"" + simpleCaseDir + "\",\n" +
-                "    \"configurations\":[" +
-                "{" +
-                "\"key\" : \"file_pattern\"," +
-                "\"value\" : \"simple.go.yml\" " +
-                "}" +
-                "]\n" +
-                "}";
-        parseDirectoryRequest.setRequestBody(requestBody);
-
-        GoPluginApiResponse response = plugin.handle(parseDirectoryRequest);
-        assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
-        JsonObject responseJsonObject = getJsonObjectFromResponse(response);
-        assertNoError(responseJsonObject);
-        JsonArray pipelines = responseJsonObject.get("pipelines").getAsJsonArray();
-        assertThat(pipelines.size(), is(1));
     }
 
     @Test

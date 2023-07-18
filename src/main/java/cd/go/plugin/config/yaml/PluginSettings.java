@@ -5,7 +5,7 @@ import java.util.Map;
 class PluginSettings {
     static final String PLUGIN_SETTINGS_FILE_PATTERN = "file_pattern";
     static final String PLUGIN_SETTINGS_JSONNET_COMMAND = "jsonnet_command";
-    static final String DEFAULT_FILE_PATTERN = "**/*.gocd.jsonnet";
+    static final String DEFAULT_FILE_PATTERN = "**/*.gocd.jsonnet,**/jsonnetfile.json";
     static final String DEFAULT_JSONNET_COMMAND = "jsonnet";
 
     private String filePattern;
