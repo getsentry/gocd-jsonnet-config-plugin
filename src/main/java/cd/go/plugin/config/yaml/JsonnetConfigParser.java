@@ -18,17 +18,15 @@ public class JsonnetConfigParser extends YamlConfigParser {
     private static final String JSONNET_FILE_NAME = "jsonnetfile.json";
     private static Logger LOGGER = Logger.getLoggerFor(JsonnetConfigParser.class);
     private String jsonnetCommand;
-    private String jbCommand;
 
     /**
      * Create a new JsonnetConfigParser.
      * @param jsonnetCommand The command to run to execute jsonnet
      * @see YamlConfigParser#YamlConfigParser(RootTransform)
      */
-    public JsonnetConfigParser(String jsonnetCommand, String jbCommand) {
+    public JsonnetConfigParser(String jsonnetCommand) {
         super(new RootTransform());
         this.jsonnetCommand = jsonnetCommand;
-        this.jbCommand = jbCommand;
     }
 
     /**
@@ -144,7 +142,7 @@ public class JsonnetConfigParser extends YamlConfigParser {
             return false;
         }
         try {
-            ProcessBuilder pb = new ProcessBuilder(jbCommand, "install");
+            ProcessBuilder pb = new ProcessBuilder("jb", "install");
             pb.directory(baseDir);
             Process p = pb.start();
             int exitCode = p.waitFor();
