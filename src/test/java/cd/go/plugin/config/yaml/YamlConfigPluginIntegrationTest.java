@@ -390,17 +390,17 @@ public class YamlConfigPluginIntegrationTest {
     }
 
     @Test
-    public void shouldCreateVendorDirectoryFromOutsideRoot() throws UnhandledRequestTypeException, IOException {
+    public void shouldFailToCreateVendorDirectoryFromOutsideRoot() throws UnhandledRequestTypeException, IOException {
         File rootDir = setupCaseNested("imported", "nested");
         File jsonnetFile = new File(rootDir, "jsonnetfile.json");
         FileUtils.copyInputStreamToFile(getResourceAsStream("examples/jsonnetfile.json"), jsonnetFile);
 
         GoPluginApiResponse response = parseAndGetResponseForDir(rootDir);
         assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
-        assertNoError(getJsonObjectFromResponse(response));
+        assertFirstErrorContains(getJsonObjectFromResponse(response), "RUNTIME ERROR: couldn't open import", "nested/imported.gocd.jsonnet");
 
         File vendorDirectory = new File(rootDir, "vendor");
-        assertTrue(vendorDirectory.exists());
+        assertFalse(vendorDirectory.exists());
     }
 
     @Test
@@ -419,7 +419,7 @@ public class YamlConfigPluginIntegrationTest {
     }
 
     @Test
-    public void shouldRespondSuccessToParseNestedDirectoryRequestWhenImportedCaseFile() throws UnhandledRequestTypeException, IOException {
+    public void shouldRespondSuccessRuntimeErrorToParseNestedDirectoryRequestWhenImportedCaseFile() throws UnhandledRequestTypeException, IOException {
         File rootDir = setupCaseNested("imported", "nested");
         File jsonnetFile = new File(rootDir, "jsonnetfile.json");
         FileUtils.copyInputStreamToFile(getResourceAsStream("examples/jsonnetfile.json"), jsonnetFile);
@@ -427,10 +427,7 @@ public class YamlConfigPluginIntegrationTest {
         GoPluginApiResponse response = parseAndGetResponseForDir(rootDir);
         assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
         JsonObject responseJsonObject = getJsonObjectFromResponse(response);
-        assertNoError(responseJsonObject);
-
-        JsonObject expected = (JsonObject) readJsonObject("examples.out/nested-imported.gocd.json");
-        assertThat(responseJsonObject, is(new JsonObjectMatcher(expected)));
+        assertFirstErrorContains(responseJsonObject, "RUNTIME ERROR: couldn't open import", "nested/imported.gocd.jsonnet");
     }
 
     @Test

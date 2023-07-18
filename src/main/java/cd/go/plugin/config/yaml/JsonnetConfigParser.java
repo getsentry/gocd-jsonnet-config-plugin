@@ -46,13 +46,13 @@ public class JsonnetConfigParser extends YamlConfigParser {
                 continue;
             }
             try {
-                boolean bundled = bundleJsonnet(baseDir);
                 File filePath = new File(baseDir, file);
+                boolean bundled = bundleJsonnet(new File(filePath.getParent()));
                 List<String> commands = new ArrayList<>();
                 commands.add(filePath.toString());
                 if (bundled) {
                     commands.add("-J");
-                    commands.add(baseDir + File.separator + VENDOR_TREE_NAME);
+                    commands.add(filePath.getParent() + File.separator + VENDOR_TREE_NAME);
                 }
                 InputStream input = compileJsonnet(commands.toArray(new String[0]));
                 // Calling YamlConfigParser's parseStream method (instead of the overridden one below)
@@ -135,6 +135,7 @@ public class JsonnetConfigParser extends YamlConfigParser {
     private boolean bundleJsonnet(File baseDir) throws JsonnetEvalException {
         // Check if <baseDir>/jsonnetfile.json exists
         File jsonnetFile = new File(baseDir + File.separator + JSONNET_FILE_NAME);
+        LOGGER.info("Checking for " + jsonnetFile.toPath());
         if (!jsonnetFile.exists()) {
             LOGGER.info("No jsonnetfile.json found, skipping jsonnet-bundler");
             // If the jsonnetfile.json doesn't exist, don't run the bundler
