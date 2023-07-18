@@ -403,9 +403,6 @@ public class YamlConfigPluginIntegrationTest {
         File rootDir = setupCase("imported");
         File jsonnetFile = new File(rootDir, "jsonnetfile.json");
         FileUtils.copyInputStreamToFile(getResourceAsStream("examples/jsonnetfile.json"), jsonnetFile);
-        DefaultGoPluginApiRequest request = new DefaultGoPluginApiRequest("configrepo", "2.0", REQ_PLUGIN_SETTINGS_CHANGED);
-        request.setRequestBody("{\"root_directory\": \"" + rootDir.getAbsolutePath() + "\"}");
-        plugin.handle(request);
 
         GoPluginApiResponse response = parseAndGetResponseForDir(rootDir);
         assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
@@ -420,9 +417,6 @@ public class YamlConfigPluginIntegrationTest {
         File rootDir = setupCaseNested("imported", "nested");
         File jsonnetFile = new File(rootDir, "jsonnetfile.json");
         FileUtils.copyInputStreamToFile(getResourceAsStream("examples/jsonnetfile.json"), jsonnetFile);
-        DefaultGoPluginApiRequest request = new DefaultGoPluginApiRequest("configrepo", "2.0", REQ_PLUGIN_SETTINGS_CHANGED);
-        request.setRequestBody("{\"root_directory\": \"" + rootDir.getAbsolutePath() + "\"}");
-        plugin.handle(request);
 
         GoPluginApiResponse response = parseAndGetResponseForDir(rootDir);
         assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
@@ -437,9 +431,6 @@ public class YamlConfigPluginIntegrationTest {
         File rootDir = setupCase("imported");
         File jsonnetFile = new File(rootDir, "jsonnetfile.json");
         FileUtils.copyInputStreamToFile(getResourceAsStream("examples/jsonnetfile.json"), jsonnetFile);
-        DefaultGoPluginApiRequest request = new DefaultGoPluginApiRequest("configrepo", "2.0", REQ_PLUGIN_SETTINGS_CHANGED);
-        request.setRequestBody("{\"root_directory\": \"" + rootDir.getAbsolutePath() + "\"}");
-        plugin.handle(request);
 
         GoPluginApiResponse response = parseAndGetResponseForDir(rootDir);
         assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
@@ -455,9 +446,6 @@ public class YamlConfigPluginIntegrationTest {
         File rootDir = setupCaseNested("imported", "nested");
         File jsonnetFile = new File(rootDir, "jsonnetfile.json");
         FileUtils.copyInputStreamToFile(getResourceAsStream("examples/jsonnetfile.json"), jsonnetFile);
-        DefaultGoPluginApiRequest request = new DefaultGoPluginApiRequest("configrepo", "2.0", REQ_PLUGIN_SETTINGS_CHANGED);
-        request.setRequestBody("{\"root_directory\": \"" + rootDir.getAbsolutePath() + "\"}");
-        plugin.handle(request);
 
         GoPluginApiResponse response = parseAndGetResponseForDir(rootDir);
         assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
@@ -471,9 +459,6 @@ public class YamlConfigPluginIntegrationTest {
     @Test
     public void shouldRespondSuccessWithRuntimeErrorMessageWhenJsonnetFileIsMissing() throws UnhandledRequestTypeException, IOException {
         File rootDir = setupCase("imported");
-        DefaultGoPluginApiRequest request = new DefaultGoPluginApiRequest("configrepo", "2.0", REQ_PLUGIN_SETTINGS_CHANGED);
-        request.setRequestBody("{\"root_directory\": \"" + rootDir.getAbsolutePath() + "\"}");
-        plugin.handle(request);
 
         GoPluginApiResponse response = parseAndGetResponseForDir(rootDir);
         assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
