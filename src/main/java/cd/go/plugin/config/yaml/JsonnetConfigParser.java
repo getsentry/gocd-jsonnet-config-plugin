@@ -1,5 +1,7 @@
 package cd.go.plugin.config.yaml;
 
+import com.thoughtworks.go.plugin.api.logging.Logger;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +16,7 @@ import cd.go.plugin.config.yaml.transforms.RootTransform;
 public class JsonnetConfigParser extends YamlConfigParser {
     private static final String VENDOR_TREE_NAME = "vendor";
     private static final String JSONNET_FILE_NAME = "jsonnetfile.json";
+    private static Logger LOGGER = Logger.getLoggerFor(JsonnetConfigParser.class);
     private String jsonnetCommand;
 
     /**
@@ -128,6 +131,7 @@ public class JsonnetConfigParser extends YamlConfigParser {
         // Check if <baseDir>/jsonnetfile.json exists
         File jsonnetFile = new File(baseDir + File.separator + JSONNET_FILE_NAME);
         if (!jsonnetFile.exists()) {
+            LOGGER.info("No jsonnetfile.json found, skipping jsonnet-bundler");
             // If the jsonnetfile.json doesn't exist, don't run the bundler
             return false;
         }
@@ -140,6 +144,7 @@ public class JsonnetConfigParser extends YamlConfigParser {
                 String error = new String(p.getErrorStream().readAllBytes());
                 throw new Exception(error);
             }
+            LOGGER.info("Successfully ran jsonnet-bundler");
             return true;
         } catch (Exception e) {
             throw new JsonnetEvalException("Error while bundling jsonnet: " + e.getMessage());
