@@ -38,8 +38,13 @@ public class JsonnetConfigParser extends YamlConfigParser {
      */
     @Override
     public JsonConfigCollection parseFiles(File baseDir, String[] files) {
+        LOGGER.info("Parsing jsonnet files " + baseDir + File.separator + String.join(", ", files));
         JsonConfigCollection collection = new JsonConfigCollection();
         for (String file : files) {
+            if (!file.endsWith(".jsonnet")) {
+                LOGGER.info("Skipping non-jsonnet file " + file);
+                continue;
+            }
             try {
                 boolean bundled = bundleJsonnet(baseDir);
                 File filePath = new File(baseDir, file);
