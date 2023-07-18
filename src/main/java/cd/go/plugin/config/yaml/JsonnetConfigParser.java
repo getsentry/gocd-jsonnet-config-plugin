@@ -3,6 +3,8 @@ package cd.go.plugin.config.yaml;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import cd.go.plugin.config.yaml.transforms.RootTransform;
 
@@ -13,18 +15,15 @@ public class JsonnetConfigParser extends YamlConfigParser {
     private static final String VENDOR_TREE_NAME = "vendor";
     private static final String JSONNET_FILE_NAME = "jsonnetfile.json";
     private String jsonnetCommand;
-    private String rootDirectory;
 
     /**
      * Create a new JsonnetConfigParser.
      * @param jsonnetCommand The command to run to execute jsonnet
-     * @param rootDirectory The root directory to resolve relative paths against
      * @see YamlConfigParser#YamlConfigParser(RootTransform)
      */
-    public JsonnetConfigParser(String jsonnetCommand, String rootDirectory) {
+    public JsonnetConfigParser(String jsonnetCommand) {
         super(new RootTransform());
         this.jsonnetCommand = jsonnetCommand;
-        this.rootDirectory = rootDirectory;
     }
 
     /**
@@ -39,9 +38,15 @@ public class JsonnetConfigParser extends YamlConfigParser {
         JsonConfigCollection collection = new JsonConfigCollection();
         for (String file : files) {
             try {
-                bundleJsonnet();
+                boolean bundled = bundleJsonnet(baseDir);
                 File filePath = new File(baseDir, file);
-                InputStream input = compileJsonnet(filePath.toString());
+                List<String> commands = new ArrayList<>();
+                commands.add(filePath.toString());
+                if (bundled) {
+                    commands.add("-J");
+                    commands.add(baseDir + File.separator + VENDOR_TREE_NAME);
+                }
+                InputStream input = compileJsonnet(commands.toArray(new String[0]));
                 // Calling YamlConfigParser's parseStream method (instead of the overridden one below)
                 super.parseStream(collection, input, file);
             } catch (NullPointerException e) {
@@ -63,7 +68,6 @@ public class JsonnetConfigParser extends YamlConfigParser {
     @Override
     public void parseStream(JsonConfigCollection result, InputStream input, String location) {
         try {
-            bundleJsonnet();
             InputStream jsonInputStream = compileJsonnet(input);
             super.parseStream(result, jsonInputStream, location);
         } catch (NullPointerException ex) {
@@ -96,10 +100,8 @@ public class JsonnetConfigParser extends YamlConfigParser {
      * @throws JsonnetEvalException if jrsonnet exits with an error
      */
     private InputStream compileJsonnet(String... command) throws JsonnetEvalException {
-        String[] commandWithArgs = new String[command.length + 3];
+        String[] commandWithArgs = new String[command.length + 1];
         commandWithArgs[0] = jsonnetCommand;
-        commandWithArgs[commandWithArgs.length - 2] = "-J";
-        commandWithArgs[commandWithArgs.length - 1] = rootDirectory + File.separator + VENDOR_TREE_NAME;
         System.arraycopy(command, 0, commandWithArgs, 1, command.length);
         try {
             ProcessBuilder pb = new ProcessBuilder(commandWithArgs);
@@ -117,23 +119,28 @@ public class JsonnetConfigParser extends YamlConfigParser {
 
     /**
      * Run the jsonnet-bundler to bundle the jsonnet dependencies.
+     * 
+     * @param baseDir The base directory to run the bundler in
+     * @return Whether the bundler was run
+     * @throws JsonnetEvalException if the bundler exits with an error
      */
-    private void bundleJsonnet() {
-        // Check if <rootDirectory>/jsonnetfile.json exists
-        File jsonnetFile = new File(rootDirectory + File.separator + JSONNET_FILE_NAME);
+    private boolean bundleJsonnet(File baseDir) throws JsonnetEvalException {
+        // Check if <baseDir>/jsonnetfile.json exists
+        File jsonnetFile = new File(baseDir + File.separator + JSONNET_FILE_NAME);
         if (!jsonnetFile.exists()) {
             // If the jsonnetfile.json doesn't exist, don't run the bundler
-            return;
+            return false;
         }
         try {
             ProcessBuilder pb = new ProcessBuilder("jb", "install");
-            pb.directory(new File(rootDirectory));
+            pb.directory(baseDir);
             Process p = pb.start();
             int exitCode = p.waitFor();
             if (exitCode != 0) {
                 String error = new String(p.getErrorStream().readAllBytes());
                 throw new Exception(error);
             }
+            return true;
         } catch (Exception e) {
             throw new JsonnetEvalException("Error while bundling jsonnet: " + e.getMessage());
         }
