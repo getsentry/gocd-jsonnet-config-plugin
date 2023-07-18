@@ -18,15 +18,17 @@ public class JsonnetConfigParser extends YamlConfigParser {
     private static final String JSONNET_FILE_NAME = "jsonnetfile.json";
     private static Logger LOGGER = Logger.getLoggerFor(JsonnetConfigParser.class);
     private String jsonnetCommand;
+    private String jbCommand;
 
     /**
      * Create a new JsonnetConfigParser.
      * @param jsonnetCommand The command to run to execute jsonnet
      * @see YamlConfigParser#YamlConfigParser(RootTransform)
      */
-    public JsonnetConfigParser(String jsonnetCommand) {
+    public JsonnetConfigParser(String jsonnetCommand, String jbCommand) {
         super(new RootTransform());
         this.jsonnetCommand = jsonnetCommand;
+        this.jbCommand = jbCommand;
     }
 
     /**
@@ -135,14 +137,14 @@ public class JsonnetConfigParser extends YamlConfigParser {
     private boolean bundleJsonnet(File baseDir) throws JsonnetEvalException {
         // Check if <baseDir>/jsonnetfile.json exists
         File jsonnetFile = new File(baseDir + File.separator + JSONNET_FILE_NAME);
-        LOGGER.info("Checking for " + jsonnetFile.toPath());
+        LOGGER.info("Checking for " + jsonnetFile.toPath() + " in " + baseDir.toPath());
         if (!jsonnetFile.exists()) {
             LOGGER.info("No jsonnetfile.json found, skipping jsonnet-bundler");
             // If the jsonnetfile.json doesn't exist, don't run the bundler
             return false;
         }
         try {
-            ProcessBuilder pb = new ProcessBuilder("jb", "install");
+            ProcessBuilder pb = new ProcessBuilder(jbCommand, "install");
             pb.directory(baseDir);
             Process p = pb.start();
             int exitCode = p.waitFor();

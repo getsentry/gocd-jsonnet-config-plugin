@@ -5,4 +5,7 @@
     <label>Jsonnet command:</label>
     <input type="text" ng-model="jsonnet_command" ng-required="false" placeholder="jsonnet" />
     <span class="form_error" ng-show="GOINPUTNAME[jsonnet_command].$error.server">{{ GOINPUTNAME[jsonnet_command].$error.server }}</span>
+    <label>Jsonnet bundler command:</label>
+    <input type="text" ng-model="jb_command" ng-required="false" placeholder="jb" />
+    <span class="form_error" ng-show="GOINPUTNAME[jb_command].$error.server">{{ GOINPUTNAME[jb_command].$error.server }}</span>
 </div>
