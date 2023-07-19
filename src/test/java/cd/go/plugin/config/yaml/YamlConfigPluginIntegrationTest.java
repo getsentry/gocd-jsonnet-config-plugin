@@ -439,6 +439,19 @@ public class YamlConfigPluginIntegrationTest {
         assertFirstErrorContains(getJsonObjectFromResponse(response), "RUNTIME ERROR: couldn't open import", "imported.gocd.jsonnet");
     }
 
+    @Test
+    public void shouldHandleMultiplePipelinesInOneFile() throws UnhandledRequestTypeException, IOException {
+        File rootDir = setupCase("multiple-pipelines");
+
+        GoPluginApiResponse response = parseAndGetResponseForDir(rootDir);
+        assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
+        JsonObject responseJsonObject = getJsonObjectFromResponse(response);
+        assertNoError(responseJsonObject);
+
+        JsonObject expected = (JsonObject) readJsonObject("examples.out/multiple-pipelines.gocd.json");
+        assertThat(responseJsonObject, is(new JsonObjectMatcher(expected)));
+    }
+
     private File setupCase(String caseName) throws IOException {
         return setupCase(caseName, "gocd.jsonnet");
     }

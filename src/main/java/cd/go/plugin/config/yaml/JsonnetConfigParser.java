@@ -75,6 +75,10 @@ public class JsonnetConfigParser extends YamlConfigParser {
      */
     @Override
     public void parseStream(JsonConfigCollection result, InputStream input, String location) {
+        if (location.endsWith(".yaml") || location.endsWith(".yml")) {
+            super.parseStream(result, input, location);
+            return;
+        }
         try {
             InputStream jsonInputStream = compileJsonnet(input);
             super.parseStream(result, jsonInputStream, location);
