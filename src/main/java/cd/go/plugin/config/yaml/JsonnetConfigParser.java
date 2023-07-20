@@ -1,12 +1,16 @@
 package cd.go.plugin.config.yaml;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.thoughtworks.go.plugin.api.logging.Logger;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import cd.go.plugin.config.yaml.transforms.RootTransform;
 
@@ -55,12 +59,32 @@ public class JsonnetConfigParser extends YamlConfigParser {
                     commands.add(filePath.getParent() + File.separator + VENDOR_TREE_NAME);
                 }
                 InputStream input = compileJsonnet(commands.toArray(new String[0]));
+                // Mark the input stream so we can reset it after parsing the jsonnet file
+                input.mark(Integer.MAX_VALUE);
+                String inputString = new String(input.readAllBytes());
+                input.reset();
+                Map<String, Object> inputMap = new Gson().fromJson(inputString, new TypeToken<Map<String, Object>>(){}.getType());
+                boolean isNested = false;
+                for (Map.Entry<String, Object> pe : inputMap.entrySet()) {
+                    // If the jsonnet file contains a nested yaml file, parse it
+                    if (pe.getKey().endsWith(".yaml") || pe.getKey().endsWith(".yml")) {
+                        Gson gson = new Gson();
+                        String json = gson.toJson(pe.getValue());
+                        // Calling YamlConfigParser's parseStream method (instead of the overridden one below)
+                        super.parseStream(collection, new ByteArrayInputStream(json.getBytes()), pe.getKey());
+                        isNested = true;
+                    }
+                }
+                // If the jsonnet file contains a nested yaml file, skip the rest of the loop
+                if (isNested) continue;
                 // Calling YamlConfigParser's parseStream method (instead of the overridden one below)
                 super.parseStream(collection, input, file);
             } catch (NullPointerException e) {
                 collection.addError("File matching GoCD Jsonnet pattern disappeared", file);
             } catch (JsonnetEvalException e) {
                 collection.addError(e.getMessage(), file);
+            } catch (IOException e) {
+                collection.addError("Error while reading Jsonnet file", file);
             }
         }
         return collection;   
