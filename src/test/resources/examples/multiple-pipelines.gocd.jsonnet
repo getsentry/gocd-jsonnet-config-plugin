@@ -1,22 +1,23 @@
 {
-  'simple-1.yaml': {
-    pipelines: {
-      pipe1: {
-        group: 'simple-1',
-        materials: {
-          mygit: {
-            git: 'http://my.example.org/mygit.git',
+  "simple-1.yaml": {
+    "format_version": 10,
+    "pipelines": {
+      "pipe1": {
+        "group": "simple-1",
+        "materials": {
+          "mygit": {
+            "git": "http://my.example.org/mygit.git",
           },
         },
-        stages: [
+        "stages": [
           {
-            build: {
-              jobs: {
-                build: {
-                  tasks: [
+            "build": {
+              "jobs": {
+                "build": {
+                  "tasks": [
                     {
-                      exec: {
-                        command: 'make',
+                      "exec": {
+                        "command": "make",
                       },
                     },
                   ],
@@ -28,24 +29,25 @@
       },
     },
   },
-  'simple-2.yaml': {
-    pipelines: {
-      pipe1: {
-        group: 'simple-2',
-        materials: {
-          mygit: {
-            git: 'http://my.example.org/mygit.git',
+  "simple-2.yaml": {
+    "format_version": 10,
+    "pipelines": {
+      "pipe1": {
+        "group": "simple-2",
+        "materials": {
+          "mygit": {
+            "git": "http://my.example.org/mygit.git",
           },
         },
-        stages: [
+        "stages": [
           {
-            build: {
-              jobs: {
-                build: {
-                  tasks: [
+            "build": {
+              "jobs": {
+                "build": {
+                  "tasks": [
                     {
-                      exec: {
-                        command: 'make',
+                      "exec": {
+                        "command": "make",
                       },
                     },
                   ],
