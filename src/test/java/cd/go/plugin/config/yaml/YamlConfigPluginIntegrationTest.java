@@ -163,6 +163,46 @@ public class YamlConfigPluginIntegrationTest {
     }
 
     @Test
+    public void shouldRespondSuccessToParseDirectoryRequestWhenSimpleCaseFileYaml() throws UnhandledRequestTypeException, IOException {
+        DefaultGoPluginApiRequest request = new DefaultGoPluginApiRequest("configrepo", "2.0", REQ_PLUGIN_SETTINGS_CHANGED);
+        request.setRequestBody("{\"file_pattern\": \"*.gocd.yaml\"}");
+
+        GoPluginApiResponse yamlFilePatternResponse = plugin.handle(request);
+
+        assertThat(yamlFilePatternResponse.responseCode(), is(SUCCESS_RESPONSE_CODE));
+
+        GoPluginApiResponse response = parseAndGetResponseForDir(setupCaseYaml("simple"));
+
+        assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
+        JsonObject responseJsonObject = getJsonObjectFromResponse(response);
+        assertNoError(responseJsonObject);
+        JsonArray pipelines = responseJsonObject.get("pipelines").getAsJsonArray();
+        assertThat(pipelines.size(), is(1));
+        JsonObject expected = (JsonObject) readJsonObject("examples.out/simple-yaml.gocd.json");
+        assertThat(responseJsonObject, is(new JsonObjectMatcher(expected)));
+    }
+
+    @Test
+    public void shouldRespondSuccessToParseDirectoryRequestWhenSimpleCaseFileJsonnetAndYaml() throws UnhandledRequestTypeException, IOException {
+        DefaultGoPluginApiRequest request = new DefaultGoPluginApiRequest("configrepo", "2.0", REQ_PLUGIN_SETTINGS_CHANGED);
+        request.setRequestBody("{\"file_pattern\": \"**/*.jsonnet,**/jsonnetfile.json,*.gocd.yaml\"}");
+
+        GoPluginApiResponse yamlFilePatternResponse = plugin.handle(request);
+
+        assertThat(yamlFilePatternResponse.responseCode(), is(SUCCESS_RESPONSE_CODE));
+
+        GoPluginApiResponse response = parseAndGetResponseForDir(setupCaseJsonnetAndYaml("simple"));
+
+        assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
+        JsonObject responseJsonObject = getJsonObjectFromResponse(response);
+        assertNoError(responseJsonObject);
+        JsonArray pipelines = responseJsonObject.get("pipelines").getAsJsonArray();
+        assertThat(pipelines.size(), is(2));
+        JsonObject expected = (JsonObject) readJsonObject("examples.out/simple-both.gocd.json");
+        assertThat(responseJsonObject, is(new JsonObjectMatcher(expected)));
+    }
+
+    @Test
     public void shouldRespondSuccessToParseDirectoryRequestWhenRichCaseFile() throws UnhandledRequestTypeException, IOException {
         GoPluginApiResponse response = parseAndGetResponseForDir(setupCase("rich"));
 
@@ -450,6 +490,20 @@ public class YamlConfigPluginIntegrationTest {
 
         JsonObject expected = (JsonObject) readJsonObject("examples.out/multiple-pipelines.gocd.json");
         assertThat(responseJsonObject, is(new JsonObjectMatcher(expected)));
+    }
+
+    private File setupCaseYaml(String caseName) throws IOException {
+        File simpleFile = Files.createFile(tempDir.resolve(caseName + ".gocd.yaml")).toFile();
+        FileUtils.copyInputStreamToFile(getResourceAsStream("examples/" + caseName + ".gocd.yaml"), simpleFile);
+        return tempDir.toFile();
+    }
+
+    private File setupCaseJsonnetAndYaml(String caseName) throws IOException {
+        File simpleFileYaml = Files.createFile(tempDir.resolve(caseName + ".gocd.yaml")).toFile();
+        FileUtils.copyInputStreamToFile(getResourceAsStream("examples/" + caseName + ".gocd.yaml"), simpleFileYaml);
+        File simpleFileJsonnet = Files.createFile(tempDir.resolve(caseName + ".gocd.jsonnet")).toFile();
+        FileUtils.copyInputStreamToFile(getResourceAsStream("examples/" + caseName + ".gocd.jsonnet"), simpleFileJsonnet);
+        return tempDir.toFile();
     }
 
     private File setupCase(String caseName) throws IOException {
