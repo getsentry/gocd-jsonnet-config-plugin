@@ -3,6 +3,8 @@ package cd.go.plugin.config.yaml;
 import com.thoughtworks.go.plugin.api.logging.Logger;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -41,8 +43,16 @@ public class JsonnetConfigParser extends YamlConfigParser {
         LOGGER.info("Parsing jsonnet files " + baseDir + File.separator + String.join(", ", files));
         JsonConfigCollection collection = new JsonConfigCollection();
         for (String file : files) {
-            if (!file.endsWith(".jsonnet")) {
-                LOGGER.info("Skipping non-jsonnet file " + file);
+            if (file.endsWith(JSONNET_FILE_NAME)) {
+                // Skip jsonnetfile.json file(s)
+                continue;
+            } else if (file.endsWith(".yaml") || file.endsWith(".yml")) {
+                // Parse YAML files using the superclass
+                try {
+                    super.parseStream(collection, new FileInputStream(new File(baseDir, file)), file);
+                } catch (FileNotFoundException e) {
+                    collection.addError("File matching GoCD Jsonnet/YAML pattern disappeared", file);
+                }
                 continue;
             }
             try {
