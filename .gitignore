@@ -31,3 +31,5 @@ docker/libs/
 /test/integration/test_ide_work/yaml-example/
 
 /bin
+
+.DS_Store
