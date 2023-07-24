@@ -40,6 +40,9 @@ You can use the example repository at: `https://github.com/getsentry/gocd-jsonne
 
 The default pattern is `**/*.jsonnet,**/jsonnetfile.json`, which will recursively search the entire repository for all files ending with `.jsonnet` and files named `jsonnetfile.json`. While `jsonnetfile.json` is not a valid jsonnet file, it is used to specify dependencies for the jsonnet files. See [jsonnet-bundler](https://github.com/jsonnet-bundler/jsonnet-bundler) for more information. If there are no external dependencies, you can omit the `jsonnetfile.json` file.
 
+Additionally, you can use a pattern that matches YAML files, such as `**/*.yaml,**/*.yml`. This is useful if you want to use the same repository for both YAML and Jsonnet files. The plugin will automatically handle the parsing of
+both YAML and Jsonnet files.
+
 You can set a custom file pattern per configuration repository using the GoCD configuration UI:
 ![jsonnet pattern config](jsonnet_file_pattern.png)
 
