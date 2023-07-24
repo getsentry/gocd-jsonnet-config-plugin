@@ -9,6 +9,7 @@ import java.io.*;
 import java.util.Map;
 
 public class YamlConfigParser {
+    private static final Gson gson = new Gson();
     private RootTransform rootTransform;
 
     public YamlConfigParser() {
@@ -48,7 +49,6 @@ public class YamlConfigParser {
             boolean isNested = false;
             for (Map.Entry<String, Object> pe : rootMap.entrySet()) {
                 if (pe.getKey().endsWith(".yaml")) {
-                    Gson gson = new Gson();
                     String json = gson.toJson(pe.getValue());
                     parseStream(result, new ByteArrayInputStream(json.getBytes()), pe.getKey());
                     isNested = true;
