@@ -17,12 +17,9 @@ This is the third GoCD configuration plugin, which builds off of the
 # Table of contents
 
 1. [Setup](#setup)
-1. [Example configuration](#example)
 1. [File pattern](#file-pattern)
-1. [Validation](#Validation)
-1. [Issues and questions](#Issues-and-questions)
+1. [Overview](#Overview)
 1. [Development](#Development)
-1. [License](#License)
 
 # Setup
 
