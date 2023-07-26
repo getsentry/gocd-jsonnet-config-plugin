@@ -5,4 +5,7 @@
     <label>Jsonnet command:</label>
     <input type="text" ng-model="jsonnet_command" ng-required="false" placeholder="jsonnet" />
     <span class="form_error" ng-show="GOINPUTNAME[jsonnet_command].$error.server">{{ GOINPUTNAME[jsonnet_command].$error.server }}</span>
+    <label>Jsonnet flags:</label>
+    <input type="text" ng-model="jsonnet_flags" ng-required="false" placeholder="" />
+    <span class="form_error" ng-show="GOINPUTNAME[jsonnet_flags].$error.server">{{ GOINPUTNAME[jsonnet_flags].$error.server }}</span>
 </div>

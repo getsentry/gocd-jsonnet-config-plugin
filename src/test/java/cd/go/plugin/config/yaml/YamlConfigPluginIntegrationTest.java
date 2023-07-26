@@ -183,6 +183,27 @@ public class YamlConfigPluginIntegrationTest {
     }
 
     @Test
+    public void shouldRespondSuccessToParseDirectoryRequestWhenSimpleCaseFileWithFlags() throws UnhandledRequestTypeException, IOException {
+        DefaultGoPluginApiRequest request = new DefaultGoPluginApiRequest("configrepo", "2.0", REQ_PLUGIN_SETTINGS_CHANGED);
+        request.setRequestBody("{\"jsonnet_flags\": \"--ext-code output-files=false\"}");
+
+        assertEquals(DEFAULT_FILE_PATTERN, plugin.getFilePattern());
+        GoPluginApiResponse flagsResponse = plugin.handle(request);
+
+        assertThat(flagsResponse.responseCode(), is(SUCCESS_RESPONSE_CODE));
+
+        GoPluginApiResponse response = parseAndGetResponseForDir(setupCase("simple"));
+
+        assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
+        JsonObject responseJsonObject = getJsonObjectFromResponse(response);
+        assertNoError(responseJsonObject);
+        JsonArray pipelines = responseJsonObject.get("pipelines").getAsJsonArray();
+        assertThat(pipelines.size(), is(1));
+        JsonObject expected = (JsonObject) readJsonObject("examples.out/simple.gocd.json");
+        assertThat(responseJsonObject, is(new JsonObjectMatcher(expected)));
+    }
+
+    @Test
     public void shouldRespondSuccessToParseDirectoryRequestWhenSimpleCaseFileJsonnetAndYaml() throws UnhandledRequestTypeException, IOException {
         DefaultGoPluginApiRequest request = new DefaultGoPluginApiRequest("configrepo", "2.0", REQ_PLUGIN_SETTINGS_CHANGED);
         request.setRequestBody("{\"file_pattern\": \"**/*.jsonnet,**/jsonnetfile.json,*.gocd.yaml\"}");
@@ -315,6 +336,17 @@ public class YamlConfigPluginIntegrationTest {
         assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
     }
 
+    @Test
+    public void shouldConsumeJsonnetFlagsOnConfigChangeRequest() throws UnhandledRequestTypeException {
+        DefaultGoPluginApiRequest request = new DefaultGoPluginApiRequest("configrepo", "2.0", REQ_PLUGIN_SETTINGS_CHANGED);
+        request.setRequestBody("{\"jsonnet_flags\": \"--ext-code output-files=false\"}");
+
+        assertEquals(DEFAULT_FILE_PATTERN, plugin.getFilePattern());
+        GoPluginApiResponse response = plugin.handle(request);
+
+        assertEquals("--ext-code output-files=false", plugin.getJsonnetFlags());
+        assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
+    }
 
     @Test
     public void shouldRespondSuccessToParseDirectoryRequestWhenPluginHasConfiguration() throws UnhandledRequestTypeException {

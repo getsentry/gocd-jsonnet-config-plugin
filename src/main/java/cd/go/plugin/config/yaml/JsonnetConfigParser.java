@@ -20,15 +20,17 @@ public class JsonnetConfigParser extends YamlConfigParser {
     private static final String JSONNET_FILE_NAME = "jsonnetfile.json";
     private static Logger LOGGER = Logger.getLoggerFor(JsonnetConfigParser.class);
     private String jsonnetCommand;
+    private String jsonnetFlags;
 
     /**
      * Create a new JsonnetConfigParser.
      * @param jsonnetCommand The command to run to execute jsonnet
      * @see YamlConfigParser#YamlConfigParser(RootTransform)
      */
-    public JsonnetConfigParser(String jsonnetCommand) {
+    public JsonnetConfigParser(String jsonnetCommand, String jsonnetFlags) {
         super(new RootTransform());
         this.jsonnetCommand = jsonnetCommand;
+        this.jsonnetFlags = jsonnetFlags;
     }
 
     /**
@@ -122,9 +124,12 @@ public class JsonnetConfigParser extends YamlConfigParser {
      * @throws JsonnetEvalException if jrsonnet exits with an error
      */
     private InputStream compileJsonnet(String... command) throws JsonnetEvalException {
-        String[] commandWithArgs = new String[command.length + 1];
+        String[] jsonnetFlagArray = jsonnetFlags != "" ? jsonnetFlags.split(" ") : new String[0];
+        String[] commandWithArgs = new String[command.length + jsonnetFlagArray.length + 1];
         commandWithArgs[0] = jsonnetCommand;
+        // Copy the command and flags into the new array
         System.arraycopy(command, 0, commandWithArgs, 1, command.length);
+        System.arraycopy(jsonnetFlagArray, 0, commandWithArgs, command.length + 1, jsonnetFlagArray.length);
         try {
             ProcessBuilder pb = new ProcessBuilder(commandWithArgs);
             Process p = pb.start();

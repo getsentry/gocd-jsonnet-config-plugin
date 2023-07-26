@@ -26,6 +26,8 @@ import static cd.go.plugin.config.yaml.PluginSettings.DEFAULT_FILE_PATTERN;
 import static cd.go.plugin.config.yaml.PluginSettings.PLUGIN_SETTINGS_FILE_PATTERN;
 import static cd.go.plugin.config.yaml.PluginSettings.DEFAULT_JSONNET_COMMAND;
 import static cd.go.plugin.config.yaml.PluginSettings.PLUGIN_SETTINGS_JSONNET_COMMAND;
+import static cd.go.plugin.config.yaml.PluginSettings.DEFAULT_JSONNET_FLAGS;
+import static cd.go.plugin.config.yaml.PluginSettings.PLUGIN_SETTINGS_JSONNET_FLAGS;
 import static com.thoughtworks.go.plugin.api.response.DefaultGoPluginApiResponse.*;
 import static java.lang.String.format;
 
@@ -33,6 +35,7 @@ import static java.lang.String.format;
 public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
     private static final String DISPLAY_NAME_FILE_PATTERN = "Go Jsonnet files pattern";
     private static final String DISPLAY_NAME_JSONNET_COMMAND = "Jsonnet command";
+    private static final String DISPLAY_NAME_JSONNET_FLAGS = "Jsonnet flags";
     private static final String PLUGIN_ID = "jsonnet.config.plugin";
     private static Logger LOGGER = Logger.getLoggerFor(YamlConfigPlugin.class);
 
@@ -117,6 +120,13 @@ public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
         return DEFAULT_JSONNET_COMMAND;
     }
 
+    String getJsonnetFlags() {
+        if (null != settings && !isBlank(settings.getJsonnetFlags())) {
+            return settings.getJsonnetFlags();
+        }
+        return DEFAULT_JSONNET_FLAGS;
+    }
+
     /**
      * fetches plugin settings if we haven't yet
      */
@@ -131,7 +141,8 @@ public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
             ParsedRequest parsed = ParsedRequest.parse(request);
 
             String jsonnetCommand = getJsonnetCommand();
-            JsonnetConfigParser parser = new JsonnetConfigParser(jsonnetCommand);
+            String jsonnetFlags = getJsonnetFlags();
+            JsonnetConfigParser parser = new JsonnetConfigParser(jsonnetCommand, jsonnetFlags);
             Map<String, String> contents = parsed.getParam("contents");
             JsonConfigCollection result = new JsonConfigCollection();
             contents.forEach((filename, content) -> {
@@ -166,7 +177,8 @@ public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
             String[] files = scanForConfigFiles(parsed, baseDir);
 
             String jsonnetCommand = getJsonnetCommand();
-            JsonnetConfigParser parser = new JsonnetConfigParser(jsonnetCommand);
+            String jsonnetFlags = getJsonnetFlags();
+            JsonnetConfigParser parser = new JsonnetConfigParser(jsonnetCommand, jsonnetFlags);
 
             JsonConfigCollection config = parser.parseFiles(baseDir, files);
             config.updateTargetVersionFromFiles();
@@ -216,6 +228,7 @@ public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
         Map<String, Object> response = new HashMap<>();
         response.put(PLUGIN_SETTINGS_FILE_PATTERN, createField(DISPLAY_NAME_FILE_PATTERN, DEFAULT_FILE_PATTERN, false, false, "0"));
         response.put(PLUGIN_SETTINGS_JSONNET_COMMAND, createField(DISPLAY_NAME_JSONNET_COMMAND, DEFAULT_JSONNET_COMMAND, false, false, "1"));
+        response.put(PLUGIN_SETTINGS_JSONNET_FLAGS, createField(DISPLAY_NAME_JSONNET_FLAGS, DEFAULT_JSONNET_FLAGS, false, false, "2"));
         return success(gson.toJson(response));
     }
 
