@@ -3,13 +3,10 @@ package cd.go.plugin.config.yaml;
 import cd.go.plugin.config.yaml.transforms.RootTransform;
 import com.esotericsoftware.yamlbeans.YamlConfig;
 import com.esotericsoftware.yamlbeans.YamlReader;
-import com.google.gson.Gson;
 
 import java.io.*;
-import java.util.Map;
 
 public class YamlConfigParser {
-    private static final Gson gson = new Gson();
     private RootTransform rootTransform;
 
     public YamlConfigParser() {
@@ -45,18 +42,6 @@ public class YamlConfigParser {
             config.setAllowDuplicates(false);
             YamlReader reader = new YamlReader(contentReader, config);
             Object rootObject = reader.read();
-            Map<String, Object> rootMap = (Map<String, Object>) rootObject;
-            boolean isNested = false;
-            for (Map.Entry<String, Object> pe : rootMap.entrySet()) {
-                if (pe.getKey().endsWith(".yaml")) {
-                    String json = gson.toJson(pe.getValue());
-                    parseStream(result, new ByteArrayInputStream(json.getBytes()), pe.getKey());
-                    isNested = true;
-                }
-            }
-            if (isNested) {
-                return;
-            }
             JsonConfigCollection filePart = rootTransform.transform(rootObject, location);
             result.append(filePart);
         } catch (YamlReader.YamlReaderException e) {
