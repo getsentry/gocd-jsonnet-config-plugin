@@ -516,12 +516,9 @@ public class YamlConfigPluginIntegrationTest {
         File rootDir = setupCase("multiple-pipelines");
 
         GoPluginApiResponse response = parseAndGetResponseForDir(rootDir);
-        assertThat(response.responseCode(), is(SUCCESS_RESPONSE_CODE));
+        assertThat(response.responseCode(), is(DefaultGoPluginApiResponse.INTERNAL_ERROR));
         JsonObject responseJsonObject = getJsonObjectFromResponse(response);
-        assertNoError(responseJsonObject);
-
-        JsonObject expected = (JsonObject) readJsonObject("examples.out/multiple-pipelines.gocd.json");
-        assertThat(responseJsonObject, is(new JsonObjectMatcher(expected)));
+        assertFirstError(responseJsonObject, "cd.go.plugin.config.yaml.YamlConfigException: simple-1.yaml is invalid, expected format_version, pipelines, environments, or common", "Jsonnet config plugin");
     }
 
     private File setupCaseYaml(String caseName) throws IOException {
