@@ -34,6 +34,7 @@ public class YamlConfigParser {
     }
 
     public void parseStream(JsonConfigCollection result, InputStream input, String location) {
+        LOGGER.info("Parsing YAML from " + location);
         try (InputStreamReader contentReader = new InputStreamReader(input)) {
             if (input.available() < 1) {
                 result.addError("File is empty", location);
@@ -44,7 +45,7 @@ public class YamlConfigParser {
             config.setAllowDuplicates(false);
             YamlReader reader = new YamlReader(contentReader, config);
             Object rootObject = reader.read();
-            LOGGER.debug("Read YAML: " + rootObject.toString());
+            LOGGER.info("Read YAML: " + rootObject.toString());
             JsonConfigCollection filePart = rootTransform.transform(rootObject, location);
             result.append(filePart);
         } catch (YamlReader.YamlReaderException e) {
