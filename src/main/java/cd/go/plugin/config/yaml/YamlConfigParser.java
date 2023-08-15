@@ -37,6 +37,7 @@ public class YamlConfigParser {
         LOGGER.info("Parsing YAML from " + location);
         try (InputStreamReader contentReader = new InputStreamReader(input)) {
             if (input.available() < 1) {
+                LOGGER.info("File is empty");
                 result.addError("File is empty", location);
                 return;
             }

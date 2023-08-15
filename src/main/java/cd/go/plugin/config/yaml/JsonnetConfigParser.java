@@ -136,11 +136,17 @@ public class JsonnetConfigParser extends YamlConfigParser {
             ProcessBuilder pb = new ProcessBuilder(commandWithArgs);
             Process p = pb.start();
             int exitCode = p.waitFor();
+            LOGGER.info("Jsonnet exited with code " + exitCode);
             if (exitCode != 0) {
                 String error = new String(p.getErrorStream().readAllBytes());
                 LOGGER.error("Jsonnet exited with an error: " + error + "\n" + "Command: " + String.join(" ", commandWithArgs));
                 throw new Exception("Jsonnet exited with an error: " + error + "\n" + "Command: " + String.join(" ", commandWithArgs));
             }
+            InputStream output = p.getInputStream();
+            output.mark(Integer.MAX_VALUE);
+            String outputString = new String(output.readAllBytes());
+            output.reset();
+            LOGGER.info("Jsonnet output: " + outputString);
             return p.getInputStream();
         } catch (Exception e) {
             LOGGER.error("Error while evaluating jsonnet: " + e.getMessage());
