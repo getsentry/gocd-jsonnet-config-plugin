@@ -61,6 +61,8 @@ public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
     public GoPluginApiResponse handle(GoPluginApiRequest request) throws UnhandledRequestTypeException {
         String requestName = request.requestName();
 
+        LOGGER.info(format("Handling request: %s", requestName));
+
         switch (requestName) {
             case REQ_PLUGIN_SETTINGS_GET_CONFIGURATION:
                 return handleGetPluginSettingsConfiguration();
