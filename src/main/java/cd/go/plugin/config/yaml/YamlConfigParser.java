@@ -3,11 +3,13 @@ package cd.go.plugin.config.yaml;
 import cd.go.plugin.config.yaml.transforms.RootTransform;
 import com.esotericsoftware.yamlbeans.YamlConfig;
 import com.esotericsoftware.yamlbeans.YamlReader;
+import com.thoughtworks.go.plugin.api.logging.Logger;
 
 import java.io.*;
 
 public class YamlConfigParser {
     private RootTransform rootTransform;
+    private static Logger LOGGER = Logger.getLoggerFor(YamlConfigParser.class);
 
     public YamlConfigParser() {
         this(new RootTransform());
@@ -42,6 +44,7 @@ public class YamlConfigParser {
             config.setAllowDuplicates(false);
             YamlReader reader = new YamlReader(contentReader, config);
             Object rootObject = reader.read();
+            LOGGER.debug("Read YAML: " + rootObject.toString());
             JsonConfigCollection filePart = rootTransform.transform(rootObject, location);
             result.append(filePart);
         } catch (YamlReader.YamlReaderException e) {
