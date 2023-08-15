@@ -131,6 +131,7 @@ public class JsonnetConfigParser extends YamlConfigParser {
         // Copy the command and flags into the new array
         System.arraycopy(command, 0, commandWithArgs, 1, command.length);
         System.arraycopy(jsonnetFlagArray, 0, commandWithArgs, command.length + 1, jsonnetFlagArray.length);
+        LOGGER.info("Running jsonnet command: " + String.join(" ", commandWithArgs));
         try {
             ProcessBuilder pb = new ProcessBuilder(commandWithArgs);
             Process p = pb.start();
