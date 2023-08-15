@@ -45,8 +45,10 @@ public class YamlConfigParser {
             config.setAllowDuplicates(false);
             YamlReader reader = new YamlReader(contentReader, config);
             Object rootObject = reader.read();
-            LOGGER.info("Read YAML: " + rootObject.toString());
             JsonConfigCollection filePart = rootTransform.transform(rootObject, location);
+            LOGGER.info("Transformed pipelines: " + filePart.getPipelines());
+            LOGGER.info("Transformed environments: " + filePart.getEnvironments());
+            LOGGER.info("Errors: " + filePart.getErrors());
             result.append(filePart);
         } catch (YamlReader.YamlReaderException e) {
             result.addError(e.getMessage(), location);
