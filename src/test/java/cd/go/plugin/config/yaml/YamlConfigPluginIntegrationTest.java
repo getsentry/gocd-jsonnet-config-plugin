@@ -521,6 +521,15 @@ public class YamlConfigPluginIntegrationTest {
         assertFirstError(responseJsonObject, "cd.go.plugin.config.yaml.YamlConfigException: simple-1.yaml is invalid, expected format_version, pipelines, environments, or common", "Jsonnet config plugin");
     }
 
+    @Test
+    public void shouldHandleNoMatchingFiles() throws UnhandledRequestTypeException, IOException {
+        File rootDir = new File(tempDir.toFile(), "no-matching-files");
+        GoPluginApiResponse response = parseAndGetResponseForDir(rootDir);
+        assertThat(response.responseCode(), is(DefaultGoPluginApiResponse.INTERNAL_ERROR));
+        JsonObject responseJsonObject = getJsonObjectFromResponse(response);
+        assertFirstError(responseJsonObject, "java.lang.IllegalStateException: basedir " + rootDir.toPath() + " does not exist.", "Jsonnet config plugin");
+    }
+
     private File setupCaseYaml(String caseName) throws IOException {
         File simpleFile = Files.createFile(tempDir.resolve(caseName + ".gocd.yaml")).toFile();
         FileUtils.copyInputStreamToFile(getResourceAsStream("examples/" + caseName + ".gocd.yaml"), simpleFile);
