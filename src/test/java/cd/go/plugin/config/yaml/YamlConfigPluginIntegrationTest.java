@@ -150,6 +150,16 @@ public class YamlConfigPluginIntegrationTest {
     }
 
     @Test
+    public void shouldRespondSuccessToParseDirectoryRequestWhenLongCaseFile() throws UnhandledRequestTypeException, IOException {
+        File rootDir = setupCase("long");
+
+        GoPluginApiResponse response = parseAndGetResponseForDir(rootDir);
+        assertThat(response.responseCode(), is(200));
+        JsonObject responseJsonObject = getJsonObjectFromResponse(response);
+        assertNoError(responseJsonObject);
+    }
+
+    @Test
     public void shouldRespondSuccessToParseDirectoryRequestWhenSimpleCaseFile() throws UnhandledRequestTypeException, IOException {
         GoPluginApiResponse response = parseAndGetResponseForDir(setupCase("simple"));
 
