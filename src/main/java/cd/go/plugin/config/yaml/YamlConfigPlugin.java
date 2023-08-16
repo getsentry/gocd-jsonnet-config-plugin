@@ -155,14 +155,11 @@ public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
     }
 
     private GoPluginApiResponse handlePipelineExportRequest(GoPluginApiRequest request) {
-        LOGGER.info("Handling request {}", request.requestName());
         return handlingErrors(() -> {
             ParsedRequest parsed = ParsedRequest.parse(request);
 
             Map<String, Object> pipeline = parsed.getParam("pipeline");
             String name = (String) pipeline.get("name");
-
-            LOGGER.info("Exporting pipeline {}", name);
 
             Map<String, String> responseMap = Collections.singletonMap("pipeline", new RootTransform().inverseTransformPipeline(pipeline));
             DefaultGoPluginApiResponse response = success(gson.toJson(responseMap));
@@ -174,14 +171,10 @@ public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
     }
 
     private GoPluginApiResponse handleParseDirectoryRequest(GoPluginApiRequest request) {
-        LOGGER.info("Handling request {}", request.requestName());
         return handlingErrors(() -> {
             ParsedRequest parsed = ParsedRequest.parse(request);
             File baseDir = new File(parsed.getStringParam("directory"));
             String[] files = scanForConfigFiles(parsed, baseDir);
-
-            LOGGER.info("Parsing config files in {}", baseDir.getAbsolutePath());
-            LOGGER.info("Found {} files: {}", files.length, Arrays.toString(files));
 
             String jsonnetCommand = getJsonnetCommand();
             String jsonnetFlags = getJsonnetFlags();
@@ -195,12 +188,9 @@ public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
     }
 
     private GoPluginApiResponse handleGetConfigFiles(GoPluginApiRequest request) {
-        LOGGER.info("Handling request {}", request.requestName());
         return handlingErrors(() -> {
             ParsedRequest parsed = ParsedRequest.parse(request);
             File baseDir = new File(parsed.getStringParam("directory"));
-
-            LOGGER.info("Scanning for config files in {}", baseDir.getAbsolutePath());
 
             Map<String, String[]> result = new HashMap<>();
             result.put("files", scanForConfigFiles(parsed, baseDir));
@@ -210,16 +200,13 @@ public class YamlConfigPlugin implements GoPlugin, ConfigRepoMessages {
     }
 
     private String[] scanForConfigFiles(ParsedRequest parsed, File baseDir) {
-        LOGGER.info("Scanning for config files in {}", baseDir.getAbsolutePath());
         String pattern = parsed.getConfigurationKey(PLUGIN_SETTINGS_FILE_PATTERN);
-        LOGGER.info("Using pattern {}", pattern);
 
         if (isBlank(pattern)) {
             pattern = getFilePattern();
         }
 
         String[] result = new AntDirectoryScanner().getFilesMatchingPattern(baseDir, pattern);
-        LOGGER.info("Found the following files: {}", Arrays.toString(result));
         return result;
     }
 

@@ -69,7 +69,6 @@ public class JsonnetConfigParser extends YamlConfigParser {
                     commands.add("-J");
                     commands.add(filePath.getParent() + File.separator + VENDOR_TREE_NAME);
                 }
-                LOGGER.info("Compiling jsonnet file " + filePath + " with command " + String.join(" ", commands));
                 InputStream input = compileJsonnet(commands.toArray(new String[0]));
                 // Calling YamlConfigParser's parseStream method (instead of the overridden one below)
                 super.parseStream(collection, input, file);
@@ -134,23 +133,19 @@ public class JsonnetConfigParser extends YamlConfigParser {
         // Copy the command and flags into the new array
         System.arraycopy(command, 0, commandWithArgs, 1, command.length);
         System.arraycopy(jsonnetFlagArray, 0, commandWithArgs, command.length + 1, jsonnetFlagArray.length);
-        LOGGER.info("Running jsonnet command: " + String.join(" ", commandWithArgs));
         try {
             ProcessBuilder pb = new ProcessBuilder(commandWithArgs);
             Process p = pb.start();
             Future<String> outputFuture = readStreamAsync(p.getInputStream());
             Future<String> errorFuture = readStreamAsync(p.getErrorStream());
             int exitCode = p.waitFor();
-            LOGGER.info("Jsonnet exited with code " + exitCode);
             if (exitCode != 0) {
                 String error = errorFuture.get();
-                LOGGER.error("Jsonnet exited with an error: " + error + "\n" + "Command: " + String.join(" ", commandWithArgs));
                 throw new Exception("Jsonnet exited with an error: " + error + "\n" + "Command: " + String.join(" ", commandWithArgs));
             }
             String outputString = outputFuture.get();
             return new ByteArrayInputStream(outputString.getBytes());
         } catch (Exception e) {
-            LOGGER.error("Error while evaluating jsonnet: " + e.getMessage());
             throw new JsonnetEvalException("Error while evaluating jsonnet: " + e.getMessage());
         }
     }
@@ -180,8 +175,6 @@ public class JsonnetConfigParser extends YamlConfigParser {
                 String error = new String(p.getErrorStream().readAllBytes());
                 throw new Exception(error);
             }
-            LOGGER.info("Successfully ran jsonnet-bundler in " + baseDir.toPath());
-            LOGGER.info("Bundled dependencies are in " + baseDir.toPath() + File.separator + VENDOR_TREE_NAME);
             return true;
         } catch (Exception e) {
             throw new JsonnetEvalException("Error while bundling jsonnet: " + e.getMessage());
