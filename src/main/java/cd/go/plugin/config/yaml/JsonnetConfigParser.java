@@ -2,6 +2,7 @@ package cd.go.plugin.config.yaml;
 
 import com.thoughtworks.go.plugin.api.logging.Logger;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import cd.go.plugin.config.yaml.transforms.RootTransform;
 
@@ -116,7 +119,7 @@ public class JsonnetConfigParser extends YamlConfigParser {
         String inputString = new String(input.readAllBytes());
         return compileJsonnet("--exec", inputString);
     }
-    
+
     /** 
      * Compile jsonnet using the jrsonnet command line tool.
      * 
@@ -135,19 +138,17 @@ public class JsonnetConfigParser extends YamlConfigParser {
         try {
             ProcessBuilder pb = new ProcessBuilder(commandWithArgs);
             Process p = pb.start();
+            Future<String> outputFuture = readStreamAsync(p.getInputStream());
+            Future<String> errorFuture = readStreamAsync(p.getErrorStream());
             int exitCode = p.waitFor();
             LOGGER.info("Jsonnet exited with code " + exitCode);
             if (exitCode != 0) {
-                String error = new String(p.getErrorStream().readAllBytes());
+                String error = errorFuture.get();
                 LOGGER.error("Jsonnet exited with an error: " + error + "\n" + "Command: " + String.join(" ", commandWithArgs));
                 throw new Exception("Jsonnet exited with an error: " + error + "\n" + "Command: " + String.join(" ", commandWithArgs));
             }
-            InputStream output = p.getInputStream();
-            output.mark(Integer.MAX_VALUE);
-            String outputString = new String(output.readAllBytes());
-            output.reset();
-            LOGGER.info("Jsonnet output: " + outputString);
-            return p.getInputStream();
+            String outputString = outputFuture.get();
+            return new ByteArrayInputStream(outputString.getBytes());
         } catch (Exception e) {
             LOGGER.error("Error while evaluating jsonnet: " + e.getMessage());
             throw new JsonnetEvalException("Error while evaluating jsonnet: " + e.getMessage());
@@ -185,5 +186,15 @@ public class JsonnetConfigParser extends YamlConfigParser {
         } catch (Exception e) {
             throw new JsonnetEvalException("Error while bundling jsonnet: " + e.getMessage());
         }
+    }
+
+    private static Future<String> readStreamAsync(InputStream stream) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return new String(stream.readAllBytes());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }
