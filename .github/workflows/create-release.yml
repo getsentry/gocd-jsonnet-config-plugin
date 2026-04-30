@@ -23,7 +23,10 @@ jobs:
           go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
       - uses: gradle/gradle-build-action@v2
       - run: gradle clean test
-      - run: gradle clean assemble -Dorg.gradle.project.version="${{ github.event.inputs.version }}"
+      - name: Build release artifact
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: gradle clean assemble -Dorg.gradle.project.version="$VERSION"
       - name: "Create release"
         uses: "actions/github-script@v6"
         env:
